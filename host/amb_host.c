@@ -1076,8 +1076,18 @@ static void recipes_before_v3(int mot, int hits)   /* (mot: where models_before5
         if (hits && proj.slot[i].par[P_HITS] == rec[P_HITS])
             proj.slot[i].par[P_HITS] = HI[i];
     }
-    proj.par[P_MOTION] = proj.slot[proj.piece].par[P_MOTION];
-    proj.par[P_HITS] = proj.slot[proj.piece].par[P_HITS];
+    {   /* (and Basic's Drums and Duck: 1.4.3's 80, 50) */
+        static const uint8_t BP[2] = {P_DRUMS, P_DUCK};
+        static const int16_t BO[2] = {80, 50};
+        int k;
+        en_piece(0, rec, &pl);
+        for (k = 0; k < 2; k++)
+            if (proj.slot[0].par[BP[k]] == rec[BP[k]])
+                proj.slot[0].par[BP[k]] = BO[k];
+    }
+    for (i = 0; i < P_NPARAMS; i++)
+        if (i == P_MOTION || i == P_HITS || i == P_DRUMS || i == P_DUCK)
+            proj.par[i] = proj.slot[proj.piece].par[i];
 }
 static void env_before36(void)                   /* (format 36, REPORT-stabenv) an older format's store: Env amount
                                                   * and the bass's old LFO's slot, Env decay's now, as the recipes had

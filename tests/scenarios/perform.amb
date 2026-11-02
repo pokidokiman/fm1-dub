@@ -250,7 +250,7 @@ tapkey b4
 wait 200
 said SOLO OFF
 # (true mutes: the Drums level untouched; the chord still muted)
-expect par3 80
+expect par3 86
 expect mutes 1
 tap SEL
 wait 200

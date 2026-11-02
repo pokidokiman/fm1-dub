@@ -83,3 +83,24 @@ voicing moves every two bars.
 Break 16, Full 32, Break. RAM: a few bytes. Tests: the Motion-zone checks moved to the new zones; the sound checks
 (rumble, strips, bass Low cut) set Motion 0 to measure the sound alone; the scenarios' Basic Hits starts and the host's
 old-format stores (recipes_before_v3) follow the new recipes.
+
+### v3b: tails and pulse (after the first listen: Basic downtempo, tails too short and too clean)
+
+Measured on the side channel (the tails: the kick and the bass are mono), against the DT4 mixdown, 400 Hz-6 kHz:
+Basic was 4-10 dB under the sets, its tails dark above 2.5 kHz; now within 1-3 dB.
+
+- **Echo brighter and thinner each pass.** Its input low-pass ~4.2 kHz at Tone 50 (was ~2); the loop's low-pass 3-5
+  kHz with a little peak (was 1.5-3.7 k); the loop's high-pass ~390-900 Hz (was ~220-780): the lows gone by the
+  third repeat, the mids and the top going on.
+- **The screech.** A band at ~1.8-2.6 kHz (Q ~1.7) added to each repeat, as much as keeps the loop at that band
+  just under 1 (0.97): DT4's Filter Delay, its band-passed repeats. A held throw pushes it past 1; the soft clip
+  bounds it.
+- **Erosion on the stab.** The stab times a band of noise (~2-4.4 kHz), as DT4's Erosion at 4.8 kHz: hiss that
+  follows the stab, the grain the echo's top repeats.
+- **Echo louder.** Its return x1.45 (1.2), its driven input's ceiling 0.42 (0.3).
+- **Never half-time.** A Thin block keeps four on the floor (2 and 4 ghosted at most); it was half-time, 16 bars of
+  it now. Basic: Drums 86 (80), Duck 60 (50).
+
+CPU (host, mean per block): Basic 27.1 us, Steppers 28.7, Pressure 34.5 (30.8 in v2: its Tonewheel rings long, the
+erosion with it). Tests: `transition`'s hand-over strike reads 115 (the erosion's grain on the thrown stab, 17 ms
+after the cue; was 94-97), its limit 125; the scenarios' Basic Drums follow the recipe.

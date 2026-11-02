@@ -244,14 +244,14 @@ said BASS 63
 expect par2 63
 tap SEQ
 tap OCT-
-said DRUMS 75
-expect par3 75
+said DRUMS 81
+expect par3 81
 tap SEQ
 tap SEQ
 tap SEQ
 expect view 16
 tap OCT+
-expect par3 80
+expect par3 86
 tap SAVE
 tap OCT+
 said NOISE 13
@@ -304,7 +304,7 @@ release OCT+
 release OCT-
 said DRUMS MUTED
 expect mutes 24
-expect par3 80
+expect par3 86
 tap SEL
 wait 100
 expect litkey6 0

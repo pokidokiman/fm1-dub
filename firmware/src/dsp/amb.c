@@ -134,8 +134,8 @@ static const struct {
     const char *name;
     int16_t v[P_NPARAMS];
 } PIECES[EN_NPIECES] = {
-    {"Basic",      {52, 30, 68, 80, 30, 50, 5, 46, 55, 1, 35, 62, 40, 25, 40, 70, 0, 1, 122, 5, 1, 0,
-                    0, 0, 1, 20, 5, 50, 3, 8, 50, 55, 30, 0, 0, 0,
+    {"Basic",      {52, 30, 68, 86, 30, 50, 5, 46, 55, 1, 35, 62, 40, 25, 40, 70, 0, 1, 122, 5, 1, 0,
+                    0, 0, 1, 20, 5, 50, 3, 8, 60, 55, 30, 0, 0, 0,
                     0, 0, 0, -25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 31,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
@@ -1174,7 +1174,7 @@ static stab_t stab[EN_NPAD];
 static float chord_vol, cut_base = 800.0f, st_dec = 0.9995f, st_fdec = 0.99f, st_t60 = 0.3f,
              st_ft = 0.095f;                    /* (format 36) the filter's envelope's time (its -60 dB, s) */
 static float st_env, st_amp, st_fenv, st_throw, throw_dec, st_cofs, st_lc[2], st_lc2[2];
-static float st_s2[4], st_c2[4], st_vofs, st_od[4];   /* (st_od: the overdrive's band and tone, left and right) */       /* (engine v2) the filter's second stage (24 dB, no resonance of its own); a
+static float st_s2[4], st_c2[4], st_vofs, st_od[4], st_er[2];   /* (st_er: the erosion's noise band) */   /* (st_od: the overdrive's band and tone, left and right) */       /* (engine v2) the filter's second stage (24 dB, no resonance of its own); a
                                                   * stab's velocity on the cutoff, in octaves: a soft one darker */
 #ifndef EN_RUMBLE
 #define EN_RUMBLE 1                              /* (the kick's rumble: off in 1.3.0; 1.4.0, the second try: on) */
@@ -1314,7 +1314,9 @@ static float fb_cap = 2.0f;                     /* stopped, the feedback eases u
 static float fx_em = 1.0f, fx_ek = 0.001f, fx_ts = 1.0f;   /* the grid on the echo: its time's multiple, its easing; the tape stop */
 static float rev_in_gain = 1.0f;                /* falls to 0 while frozen */
 static float tape_lpc = 0.55f, tape_hpc = 0.08f; /* the echo's feedback band-pass */
-static float tl_c[4], tl_s[2], tl_ph, ec_xr = 0.6667f;   /* (engine v2) the feedback's low-pass, two poles (its coefficients,
+static float tl_c[4], tl_s[2], tl_ph, ec_xr = 0.6667f;
+static float tb_c[4], tb_s[2], ec_bb;            /* (engine v3) the screech: a band in the loop, its coefficients, state,
+                                                  * and how much of it goes round again */   /* (engine v2) the feedback's low-pass, two poles (its coefficients,
                                                   * state, its slow wander's phase); the right's tap, the left's time
                                                   * times this: 3/16 against 2/16, as the dub sets' Echo */
 static float crackle_vol, cloud_amt;
@@ -3118,7 +3120,8 @@ EN_COLD static int kick_draw(int next)
                                                   * Groove; a Thin, ghosted or half) */
         if (next != SEC_THIN)
             return KS_FOUR;
-        return frand() < 0.5f ? KS_GHOST : KS_HALF;
+        return frand() < 0.5f ? KS_GHOST : KS_FOUR;   /* (engine v3: never half-time, a Thin block 16 bars long:
+                                                  * the Audioreakt sets keep four on the floor; 2 and 4 ghosted at most) */
     }
     if (phr < 8u && !kick_hand)
         x += (4.0f - x) * (float)(8u - phr) * (1.0f / 6.0f);
@@ -3539,18 +3542,31 @@ static void heads_step(uint32_t n)
      * up together */
     dub_up = 0.0f;                               /* (1.3.0: PERFORM's second knob is Wet now, not Dub) */
     sw = fm_clampf(0.45f + 0.5f * arcm + 0.3f * perf_sw + 0.5f * sl_ds * mod[5].v - 0.3f * dub_up, 0.0f, 1.0f);   /* (Dub up: darker) */
-    tape_hpc = 0.12f + 0.24f * sw * sw;          /* (the classics pass: ~220 Hz at the bottom, was ~165) */
+    tape_hpc = 0.2f + 0.2f * sw * sw;            /* (engine v3: ~390 Hz at the bottom to ~900, was ~220: each repeat
+                                                  * thinner, the sets' Echo's 160-570 Hz high-pass, the lows gone by
+                                                  * the third pass, what's left the mids and the top: the screech) */
     tape_lpc = 0.58f + 0.3f * sw;
     {   /* (engine v2) the loop's low-pass two poles at the one pole's corner (~1.5 .. 3.7 kHz): each repeat darker
          * sooner; Butterworth, no peak (a peak in a loop near 100% would ring for ever); and wandering, a hand on
          * the echo's filter: a sine at ~0.11 Hz, +-0.4 octave at Drift 50 (Koçer's dub echo: the LPF's cutoff on a
          * slow LFO, presence against depth) */
-        float fc = -fm_logf(1.0f - tape_lpc) * (TAPE_SR / (2.0f * FM_PI));
+        float fc = 3000.0f * fm_exp2f(0.75f * fm_clampf((tape_lpc - 0.58f) * (1.0f / 0.3f), 0.0f, 1.0f));   /* (engine
+                                                  * v3: 3-5 kHz, as the sets' Echo's 4.5-5.5 k; was the one pole's
+                                                  * 1.5-3.7 k: the tails too dark) */
         tl_ph += (float)n * (0.11f / EN_SR);
         if (tl_ph >= 1.0f)
             tl_ph -= 1.0f;
         fc *= fm_exp2f(0.4f * fm_minf(mv_d * 2.0f, 1.3f) * sine(tl_ph) * (en_frozen ? 0.0f : 1.0f));
-        svf_coefs(tl_c, fm_clampf(fc, 300.0f, 0.45f * TAPE_SR) * (EN_SR / TAPE_SR), 1.4142f);   /* (svf_coefs is at
+        svf_coefs(tl_c, fm_clampf(fc, 300.0f, 0.45f * TAPE_SR) * (EN_SR / TAPE_SR), 1.1f);
+        /* (engine v3) the screech: a band at ~1.8-2.6 kHz (moving with the sweep and the wander), Q ~1.7, added to
+         * each repeat: DT4's Filter Delay, its repeats band-passed at 1.7 and 5 kHz going round at 0.3-0.38, the top
+         * ringing on after the body's gone. As much as keeps the loop at the band just under 1 (0.97: long, never
+         * running away on its own; a throw held pushes past it, the soft clip bounding it), 0.35 at most */
+        svf_coefs(tb_c, fm_clampf(1800.0f * fm_exp2f(0.5f * sw) * (fc / 3000.0f), 900.0f, 0.4f * TAPE_SR) *
+                            (EN_SR / TAPE_SR), 0.6f);
+        ec_bb = fm_clampf((0.97f / fm_maxf(echo_fb, 0.2f) - 1.0f) * (1.0f / 1.67f), 0.0f, 0.35f);   /* (engine v3: a little
+                                                  * peak, ~+0.8 dB, as the Echo's Resonance at 0.1-0.3: the corner sings
+                                                  * as the repeats stack; at the loop's ceiling the soft clip bounds it) */   /* (svf_coefs is at
                                                   * the engine's rate: the corner scaled to the tape's) */
     }
     {   /* (engine v2) the right's tap: a dotted time's two thirds (1/8. against 1/8, 1/4. against 1/4), a straight
@@ -3653,9 +3669,16 @@ static inline void echoes(float in, float *el, float *er, float *xl, float *xr)
                 tl_s[1] = 2.0f * v2 - tl_s[1];
                 tape_lp = v2;
             }
+            {   /* (engine v3) the screech's band, added */
+                const float v3 = tape_lp - tb_s[1], v1 = tb_c[0] * tb_s[0] + tb_c[1] * v3,
+                            v2 = tb_s[1] + tb_c[1] * tb_s[0] + tb_c[2] * v3;
+                tb_s[0] = 2.0f * v1 - tb_s[0];
+                tb_s[1] = 2.0f * v2 - tb_s[1];
+                tape_lp += ec_bb * v1;
+            }
             tape_hp += tape_hpc * (tape_lp - tape_hp);
             fb = ec_fb(tape_lp - tape_hp);       /* (and more dissolved) */
-            w = soft(4.0f * ec_in(tape_acc * 0.25f)) * 0.3f + 0.7f * sat(fb * g * (1.0f / 0.7f));   /* (engine v2: the
+            w = soft(4.0f * ec_in(tape_acc * 0.25f)) * 0.42f + 0.7f * sat(fb * g * (1.0f / 0.7f));   /* (engine v2: the
                                                   * input driven, the dub sets' Echo at +5..+13 dB into its clipper: a
                                                   * soft stab comes back nearly as loud as a hard one, the rain heard) */
             if (++tape_w >= TAPE_N)
@@ -4301,8 +4324,9 @@ EN_COLD static void apply(int p, int v)
                                                   * down to 500 Hz at 0; (format 32: no dead top) up to 5 kHz at 100,
                                                   * 1.32 octaves over the half (before, the same octave a quarter, at
                                                   * 5 kHz by 83, 83-100 alike) */
-        ec_lpc = 1.0f - fm_expf(-2.0f * FM_PI * fm_clampf(2000.0f * fm_exp2f((float)(v - 50) * (v > 50 ? 0.026439f : 0.04f)),
-                                                         400.0f, 5000.0f) / TAPE_SR);
+        ec_lpc = 1.0f - fm_expf(-2.0f * FM_PI * fm_clampf(4200.0f * fm_exp2f((float)(v - 50) * (v > 50 ? 0.0062f : 0.04f)),
+                                                         600.0f, 5200.0f) / TAPE_SR);   /* (engine v3: ~4.2 kHz at 50, was
+                                                  * ~2: the sets' Echo lets 4.5-5.5 kHz in, the repeats' top kept) */
         break;
     case P_EWIDTH: ec_wide = (float)v * 0.02f; break;   /* the heads' spread: 0 mono, 1 (50), 2 wide */
     case P_POCT:                                 /* let it be heard now: a ping from the first loop */
@@ -5119,6 +5143,7 @@ static void render_stabs(uint32_t n)
     float s0 = st_s[0], s1 = st_s[1], s2 = st_s[2], s3 = st_s[3], env = st_env, amp = st_amp, thr = st_throw;
     float t0 = st_s2[0], t1 = st_s2[1], t2 = st_s2[2], t3 = st_s2[3];   /* (engine v2: the second stage's) */
     float obl = st_od[0], obr = st_od[1], otl = st_od[2], otr = st_od[3];   /* (and the overdrive's) */
+    float er0 = st_er[0], er1 = st_er[1];        /* (and the erosion's) */
     float hl = st_h[0], hr = st_h[1], ll = st_lc[0], lr = st_lc[1], l2l = st_lc2[0], l2r = st_lc2[1];
     const int flp = LPF_MODE(0);
     const float lc = lcut[0], ce = 0.8f * sx[0][0] * mx_e[0], cp = 0.35f * sx[0][1] * mx_p[0],   /* (the strip: its Filter, its sends) */
@@ -5251,6 +5276,18 @@ static void render_stabs(uint32_t n)
             yl = sat(yl) * 0.4f + 0.075f * (otl - 0.149f);
             yr = sat(yr) * 0.4f + 0.075f * (otr - 0.149f);
         }
+        {   /* (engine v3) erosion: the stab times a band of noise around ~4-5 kHz, as the sets' Erosion at 4.8 kHz on
+             * the chords: a hiss that follows the stab, quiet dry, and what the echo's top repeats (the screech's
+             * grain) */
+            float nz;
+            noise = noise * 1664525u + 1013904223u;
+            nz = (float)(int32_t)noise * (1.0f / 2147483648.0f);
+            er0 += 0.45f * (nz - er0);           /* (~4.4 kHz down) */
+            er1 += 0.25f * (er0 - er1);
+            nz = er0 - er1;                      /* (and ~2 kHz up: the band) */
+            yl += 0.9f * yl * nz;
+            yr -= 0.9f * yr * nz;
+        }
         hl += 0.0125f * (yl - hl);               /* a gentle high-pass, ~90 Hz (engine v2: from ~160; the chord's body
                                                   * kept, the bass's octave left to the bass) */
         hr += 0.0125f * (yr - hr);
@@ -5288,6 +5325,8 @@ static void render_stabs(uint32_t n)
     st_od[1] = fm_flush(obr);
     st_od[2] = fm_flush(otl);
     st_od[3] = fm_flush(otr);
+    st_er[0] = fm_flush(er0);
+    st_er[1] = fm_flush(er1);
     st_h[0] = fm_flush(hl);
     st_h[1] = fm_flush(hr);
     st_lc[0] = lc > 0.0f ? fm_flush(ll) : 0.0f;
@@ -6557,8 +6596,9 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
         pl_back = 0.5f * (wl + wr);
         cl *= 1.0f + 9.0f * fx_cf;               /* (Freeze: the held cloud brought forward) */
         cr *= 1.0f + 9.0f * fx_cf;
-        l = mixl[j] * dry + 1.2f * el + 1.1f * wl + 1.4f * cl;   /* (1.3.0: the Echoplex's taps out) */
-        r = mixr[j] * dry + 1.2f * er + 1.1f * wr + 1.4f * cr;
+        l = mixl[j] * dry + 1.45f * el + 1.1f * wl + 1.4f * cl;   /* (1.3.0: the Echoplex's taps out; engine v3: the
+                                                  * echo +1.6 dB, 1.2 before: the sets' wet over their dry) */
+        r = mixr[j] * dry + 1.45f * er + 1.1f * wr + 1.4f * cr;
         sd = 0.5f * (l - r);                     /* mono below ~80 Hz (the classics pass; was ~150): the side's lows
                                                   * taken out (two poles), so the
                                                   * stabs' and pings' low partials, the echo's and the plate's, sit in

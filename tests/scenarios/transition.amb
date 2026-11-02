@@ -78,8 +78,9 @@ expect bpm 128
 wait 10000
 expect playing 1
 expect trquiet <2000
-# (step 5's Basic: the stab thrown into the held echo has a sharp edge; its repeats, a dotted 8th apart, read 94-97)
-expect trclick <110
+# (step 5's Basic: the stab thrown into the held echo has a sharp edge; its repeats, a dotted 8th apart, read 94-97;
+# engine v3: the stab's erosion, a noise band on its strike, 115, at the cue's strike, 17 ms in)
+expect trclick <125
 # Mix: Pressure (126) to Haze (116), the same lengths; the last piece's end: it rests
 tap PLAY
 wait 500
