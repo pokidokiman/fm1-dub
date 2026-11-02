@@ -1564,7 +1564,7 @@ int main(void)
         }
         CHECK(hz[1] >= 3 * hz[0] && hz[1] <= 5 * hz[0] && hz[2] * 3 <= hz[0] + 2, "Env decay +25 x4 (%d), -25 x1/4 (%d) of %d",
               hz[1], hz[2], hz[0]);
-        {   /* (the Chord filter page's picture, en_chord_env: Env 0 the voice's own depth (Saws 2.5 octaves), its
+        {   /* (the Chord filter page's picture, en_chord_env: Env 0 the voice's own depth (Saws 4 octaves, engine v2; 2.5 before), its
              * left none, its right twice; the time the engine's, as the picture's above) */
             float o[3], f, ta, t6;
             const int ev[3] = {-50, 0, 50};
@@ -1576,7 +1576,7 @@ int main(void)
             en_set(P_CENV, 0);
             printf("  Env -50, 0, +50: the sweep %.2f, %.2f, %.2f octaves; its time %.1f ms, the stab's %.0f ms\n", (double)o[0],
                    (double)o[1], (double)o[2], (double)(f * 1000.0f), (double)(t6 * 1000.0f));
-            CHECK(o[0] < 0.001f && fabsf(o[1] - 2.5f) < 0.01f && fabsf(o[2] - 5.0f) < 0.01f && ta > 0.0f,
+            CHECK(o[0] < 0.001f && fabsf(o[1] - 4.0f) < 0.01f && fabsf(o[2] - 8.0f) < 0.01f && ta > 0.0f,
                   "en_chord_env: Env -50, 0, +50 gave %.2f, %.2f, %.2f octaves", (double)o[0], (double)o[1], (double)o[2]);
         }
         en_set(P_CEDEC, 25);

@@ -1174,6 +1174,8 @@ static stab_t stab[EN_NPAD];
 static float chord_vol, cut_base = 800.0f, st_dec = 0.9995f, st_fdec = 0.99f, st_t60 = 0.3f,
              st_ft = 0.095f;                    /* (format 36) the filter's envelope's time (its -60 dB, s) */
 static float st_env, st_amp, st_fenv, st_throw, throw_dec, st_cofs, st_lc[2], st_lc2[2];
+static float st_s2[4], st_c2[4], st_vofs, st_od[4];   /* (st_od: the overdrive's band and tone, left and right) */       /* (engine v2) the filter's second stage (24 dB, no resonance of its own); a
+                                                  * stab's velocity on the cutoff, in octaves: a soft one darker */
 #ifndef EN_RUMBLE
 #define EN_RUMBLE 1                              /* (the kick's rumble: off in 1.3.0; 1.4.0, the second try: on) */
 #endif
@@ -1185,7 +1187,7 @@ static float ec_dk, ec_dd;                      /* (the classics pass) a strike 
                                                  * eased; the repeats heard in the gaps, not over the stab */
 static float st_s[4], st_c[4], st_h[2];
 static int32_t st_midi_left;
-static int shape, root_note = 55;               /* the voicing's shape, the chord's root as voiced (MIDI) */
+static int shape, root_note = 48;               /* the voicing's shape, the chord's root as voiced (MIDI) */
 static const float STAB_PAN[EN_NPAD] = {-0.3f, -0.09f, 0.12f, 0.33f};   /* (1.3.0: 60% of the spread) */
 static float stab_gl[EN_NPAD], stab_gr[EN_NPAD];
 static int32_t gate_ctr;                        /* samples since the sixteenth began (the grid's Gate) */
@@ -1199,14 +1201,16 @@ static const struct {
     float att, dec, fenv, ratio, idx_hi, idx_lo, gain;
 } CV[EN_NCV] = {
     /* (1.3.0: each strike opens further, and closes sooner) */
-    {0.035f, 1.0f, 2.5f, 0.0f, 0.0f, 0.0f, 1.0f},        /* Saws: two saws a voice, 7 cents apart */
-    {0.035f, 1.3f, 1.4f, 1.0f, 0.41f, 0.06f, 1.23f},     /* Keys: FM at the carrier's pitch, an electric piano */
-    {0.02f, 2.5f, 0.7f, 0.0f, 0.0f, 0.0f, 0.75f},        /* Organ: four drawbars (1, 2, 3, 4) */
-    {0.00012f, 4.0f, 0.6f, 0.0f, 0.0f, 0.0f, 0.72f},     /* Pad: the saws, swelling in, long */
-    {0.05f, 1.8f, 1.1f, 3.5f, 0.35f, 0.05f, 1.17f},      /* Bell: FM at 3.5, the clang dying first */
-    {0.03f, 3.0f, 0.4f, 0.0f, 0.0f, 0.0f, 0.67f},        /* Tonewheel: drawbars, a percussion and a click at the
+    /* (engine v2: the filter's base an octave lower, its envelope deeper and scaled by the stab's velocity: a hard stab
+     * opens as far as before or further, a soft one stays dark, the Audioreakt sets' Filter <- Env + Vel) */
+    {0.035f, 1.0f, 4.0f, 0.0f, 0.0f, 0.0f, 1.0f},        /* Saws: two saws a voice, 7 cents apart */
+    {0.035f, 1.3f, 2.2f, 1.0f, 0.41f, 0.06f, 1.23f},     /* Keys: FM at the carrier's pitch, an electric piano */
+    {0.02f, 2.5f, 1.3f, 0.0f, 0.0f, 0.0f, 0.75f},        /* Organ: four drawbars (1, 2, 3, 4) */
+    {0.00012f, 4.0f, 1.2f, 0.0f, 0.0f, 0.0f, 0.72f},     /* Pad: the saws, swelling in, long */
+    {0.05f, 1.8f, 1.7f, 3.5f, 0.35f, 0.05f, 1.17f},      /* Bell: FM at 3.5, the clang dying first */
+    {0.03f, 3.0f, 0.9f, 0.0f, 0.0f, 0.0f, 0.67f},        /* Tonewheel: drawbars, a percussion and a click at the
                                                           * strike, a rotary speaker turning (left against right) */
-    {0.05f, 0.6f, 2.6f, 0.0f, 0.0f, 0.0f, 3.6f},         /* Noise: noise and a little saw, the filter's pitch */
+    {0.05f, 0.6f, 3.2f, 0.0f, 0.0f, 0.0f, 3.6f},         /* Noise: noise and a little saw, the filter's pitch */
 };
 /* (format 32, the variety plan's step 4: no dead steps) how far Attack slows each voice's strike at 100, in octaves of
  * its smoothing: 9 (to ~1/500), or as far as the slowest (0.00004) allows: the Pad, already slow, 1.6 (before, its 9
@@ -1237,6 +1241,7 @@ static const float BV_GAIN[EN_NBV] = {1.0f, 1.1f, 1.0f, 1.0f, 1.16f};
 static const fmpatch_t *const BV_PATCH[EN_NBV] = {0, &FM_PUNCH, &FM_RUBBER, &FM_PLUCK, &FM_GROWL};
 static fmvoice_t bfm;
 static float bass_bite, bite_dec, bass_lc, bass_lc2;
+static float bass_sw[2];                         /* (engine v2) the Sub's saw, low-passed: its two poles */
 
 /* ----------------------------------------------------------------- pings --- */
 #define NBELL 6
@@ -1260,6 +1265,7 @@ typedef struct {
     float ph, inc, inc_end, amp, adec, x1, x2, att, mph[4], pend, clk, lp[2], lc, lc2;   /* (lp: a hat's low-pass; lc: the
                                                   * strip's Low cut's state) */
     int32_t wait;                               /* swing: samples until a hit that waits (pend: its velocity) */
+    int32_t hold;                               /* (engine v2) the kick's body: samples before it starts to fall */
     uint8_t on, note;
 } drum_t;
 static drum_t drum[EN_NDRUM];
@@ -1286,16 +1292,19 @@ static float duck_xb, duck_db, duck_relb;       /* the bass's duck: deeper, and 
 /* the kits: the kick (its pitch at the strike, times its note; how quickly it falls; its length; its click;
  * its drive) and the hats (their high-pass, times Hats'; how much noise against the metal; their length) */
 static const struct {
-    float start, fall, t60, click, drive, hat_f, noise, hat_t, gain;
+    float start, fall, t60, click, drive, hat_f, noise, hat_t, gain, hold, hat_lp;
 } KIT[EN_NKIT] = {
     /* (1.3.0's sound pass: each kick from lower, longer, with half the click; a soft, rolling pulse, the
      * thump down from 100-200 Hz into the sub) */
-    {2.75f, 0.0016f, 0.63f, 0.25f, 1.5f, 1.0f, 0.7f, 1.0f, 1.0f},  /* Tight */
-    {2.0f, 0.0008f, 0.7f, 0.1f, 1.3f, 0.92f, 0.7f, 1.2f, 0.6f},    /* Deep: long, 808-ish (shorter and softer than
-                                                                    * it was: over a bass that holds now) */
-    {4.0f, 0.003f, 0.38f, 0.45f, 2.5f, 1.05f, 0.6f, 0.8f, 1.35f},  /* Punch: short and hard */
-    {1.8f, 0.0012f, 0.75f, 0.0f, 1.0f, 0.82f, 0.85f, 1.3f, 0.86f}, /* Soft: a muffled thump */
-    {2.6f, 0.0016f, 0.6f, 0.18f, 1.8f, 0.75f, 1.0f, 1.1f, 1.0f},   /* Dusty: darker, noisier hats */
+    /* (engine v2, measured against the dub sets' kicks, ADRKT_TS_BD1 and RT2_Kick_55: they strike at 180-300 Hz and
+     * are at the note by 40-60 ms, the body held 35-100 ms before it falls. So each kick from ~4.5 x its note again,
+     * the knock, and held: hold, s, before the t60's fall. And the hats brighter: hat_lp, their low-pass's step, two
+     * poles; 0.65 was ~6 kHz, the sets' hats are 7-10 kHz) */
+    {4.5f, 0.0016f, 0.55f, 0.25f, 1.5f, 1.0f, 0.7f, 1.0f, 0.85f, 0.045f, 0.86f},  /* Tight */
+    {3.2f, 0.0008f, 0.65f, 0.1f, 1.3f, 0.92f, 0.7f, 1.2f, 0.52f, 0.07f, 0.8f},    /* Deep: long, 808-ish */
+    {5.5f, 0.003f, 0.36f, 0.45f, 2.5f, 1.05f, 0.6f, 0.8f, 1.2f, 0.02f, 0.9f},     /* Punch: short and hard */
+    {2.6f, 0.0012f, 0.7f, 0.0f, 1.0f, 0.82f, 0.85f, 1.3f, 0.76f, 0.04f, 0.72f},   /* Soft: a muffled thump */
+    {4.0f, 0.0016f, 0.55f, 0.18f, 1.8f, 0.75f, 1.0f, 1.1f, 0.88f, 0.04f, 0.65f},  /* Dusty: darker, noisier hats */
 };
 static int kit;
 
@@ -1305,6 +1314,9 @@ static float fb_cap = 2.0f;                     /* stopped, the feedback eases u
 static float fx_em = 1.0f, fx_ek = 0.001f, fx_ts = 1.0f;   /* the grid on the echo: its time's multiple, its easing; the tape stop */
 static float rev_in_gain = 1.0f;                /* falls to 0 while frozen */
 static float tape_lpc = 0.55f, tape_hpc = 0.08f; /* the echo's feedback band-pass */
+static float tl_c[4], tl_s[2], tl_ph, ec_xr = 0.6667f;   /* (engine v2) the feedback's low-pass, two poles (its coefficients,
+                                                  * state, its slow wander's phase); the right's tap, the left's time
+                                                  * times this: 3/16 against 2/16, as the dub sets' Echo */
 static float crackle_vol, cloud_amt;
 
 /* ------------------------------------------------------- the arrangement --- */
@@ -1390,9 +1402,11 @@ EN_COLD static void voice_chord(void)
     n = root_note + ((pc - root_note) % 12 + 12) % 12;
     if (n - root_note > 6)
         n -= 12;
-    while (n < 48)
+    while (n < 42)                               /* (engine v2: F#2..F3, down from C3..B3: the chord's body in the low
+                                                  * mids, as the dub sets voice it, F1..G2 roots, the filter keeping it
+                                                  * out of the bass) */
         n += 12;
-    while (n > 59)
+    while (n > 53)
         n -= 12;
     root_note = n;
     for (i = 0; i < EN_NPAD; i++) {
@@ -1916,10 +1930,19 @@ EN_COLD static void stab_fire(float vel, int throw_it)
         stab[i].midi_note = stab[i].note;
         midi(0x90, stab[i].note, (uint32_t)(40.0f + 80.0f * vel));
     }
-    st_env = vel;
+    {   /* (engine v2) the velocity: how far the filter's envelope opens (0.3 .. 1 of its depth) and where the cutoff
+         * sits (-1.1 .. +0.25 octave); a ghost under a stab still ringing adds to it, not cutting it short */
+        const float fv = 0.3f + 0.7f * vel * vel, vo = 1.35f * (vel - 0.82f);
+        if (vel >= 0.7f * st_env) {
+            st_env = vel;
+            st_fenv = fv;
+            st_vofs = vo;
+            st_cofs = (frand() - 0.5f) * 0.8f * loose();   /* (1.3.0: each stab its own cutoff, +-0.4 octave) */
+        } else {
+            st_fenv = fm_maxf(st_fenv, fv);
+        }
+    }
     ec_dk = fm_maxf(ec_dk, vel);
-    st_fenv = 1.0f;
-    st_cofs = (frand() - 0.5f) * 0.8f * loose();   /* (1.3.0: each stab its own cutoff, +-0.4 octave) */
     click = cvoice == CV_WHEEL ? 0.12f * vel : 0.0f;
     en_stab_vel = vel;
     en_stab_thrown = (uint8_t)(throw_it != 0);
@@ -2008,6 +2031,7 @@ EN_COLD static void drum_fire(int d, float vel)
         v->inc = f * KIT[kit].start * fm_exp2f(0.8f * pu) * (1.0f / EN_SR);
         v->inc_end = f * (1.0f / EN_SR);
         v->adec = fm_expf(-6.9f / (KIT[kit].t60 * fm_exp2f(1.2f * rel(P_KLEN)) * EN_SR));
+        v->hold = (int32_t)(KIT[kit].hold * fm_exp2f(rel(P_KLEN)) * EN_SR);   /* (engine v2: Kick len stretches it too) */
         v->clk = KIT[kit].click * 2.0f * fm_maxf(1.0f + pu, 0.0f);   /* (Tight: 1, as before) */
         duck_x = duck_xb = 1.0f;
         break;
@@ -3190,13 +3214,27 @@ EN_COLD static void tick(void)
         int last = !later, thr = (fill && last) ||
                                  frand() < fm_minf(0.12f * loose() * (sec == SEC_BREAK ? 1.5f : 1.0f) * throw_mul *
                                                    fm_minf(100.0f * lay_a[VY_CHORD] / (float)par[P_TVARY], 3.0f), 0.6f);
-        float vel = st == (int)__builtin_ctz(en_stab_pat) ? 0.9f + 0.1f * frand() : 0.65f + 0.25f * frand();
+        /* (engine v2: the bar's first stab the accent; the others wider apart, 0.5 .. 0.88, so their filters open
+         * each its own way: velocity is the cutoff now, stab_fire) */
+        float vel = st == (int)__builtin_ctz(en_stab_pat) ? 0.9f + 0.1f * frand() : 0.5f + 0.38f * frand();
         if (!(mutes & EN_M_CHORD))
             stab_fire(vel, thr || (perf & EN_PF_THROW) || (fxm >> EN_FX_THROW & 1u) || song_thr);
         en_stab_v[st] = (uint8_t)(fm_minf(vel, 1.0f) * 255.0f);   /* (the chord's page: as struck) */
         if (en_stab_thrown)
             en_stab_thr |= (uint16_t)(1u << st);
         en_stab_t60 = st_t60;
+    } else if (lay_stabs && (st & 3) && !(mutes & EN_M_CHORD) && !en_frozen) {
+        /* (engine v2) the ghost stabs: now and then a soft one on an empty sixteenth off the beat (the e's and a's,
+         * the and's half as often), dark (its velocity the filter's) and mostly heard in the echo: the chord rain
+         * under the pattern, as the dub sets layer it. As the chord's amount: none at Vary 0 or Hold, ~0.6 a bar
+         * at the classics' 50, ~1.5 from 62 */
+        const float pg = 0.1f * fm_minf(lay_a[VY_CHORD] * 8.0f, 1.5f) * (st & 1 ? 1.0f : 0.5f) *
+                         (en_stab_pat ? 1.0f : 0.5f) * (sec == SEC_BREAK ? 1.4f : 1.0f);
+        if (pg > 0.0f && frand() < pg) {
+            const float gv = 0.2f + 0.25f * frand();
+            stab_fire(gv, 0);
+            en_stab_v[st] = (uint8_t)(gv * 255.0f);
+        }
     }
     noise_step((int)(sixteenth & 31u));         /* (the noise's groove: two bars) */
     for (d = 0; d < EN_NDRUM; d++)
@@ -3455,6 +3493,23 @@ static void heads_step(uint32_t n)
     sw = fm_clampf(0.45f + 0.5f * arcm + 0.3f * perf_sw + 0.5f * sl_ds * mod[5].v - 0.3f * dub_up, 0.0f, 1.0f);   /* (Dub up: darker) */
     tape_hpc = 0.12f + 0.24f * sw * sw;          /* (the classics pass: ~220 Hz at the bottom, was ~165) */
     tape_lpc = 0.58f + 0.3f * sw;
+    {   /* (engine v2) the loop's low-pass two poles at the one pole's corner (~1.5 .. 3.7 kHz): each repeat darker
+         * sooner; Butterworth, no peak (a peak in a loop near 100% would ring for ever); and wandering, a hand on
+         * the echo's filter: a sine at ~0.11 Hz, +-0.4 octave at Drift 50 (Koçer's dub echo: the LPF's cutoff on a
+         * slow LFO, presence against depth) */
+        float fc = -fm_logf(1.0f - tape_lpc) * (TAPE_SR / (2.0f * FM_PI));
+        tl_ph += (float)n * (0.11f / EN_SR);
+        if (tl_ph >= 1.0f)
+            tl_ph -= 1.0f;
+        fc *= fm_exp2f(0.4f * fm_minf(mv_d * 2.0f, 1.3f) * sine(tl_ph) * (en_frozen ? 0.0f : 1.0f));
+        svf_coefs(tl_c, fm_clampf(fc, 300.0f, 0.45f * TAPE_SR) * (EN_SR / TAPE_SR), 1.4142f);   /* (svf_coefs is at
+                                                  * the engine's rate: the corner scaled to the tape's) */
+    }
+    {   /* (engine v2) the right's tap: a dotted time's two thirds (1/8. against 1/8, 1/4. against 1/4), a straight
+         * time's three halves (1/8 against 1/8., 1/4 against 1/4.), the bar's three quarters */
+        const int et = (unsigned)par[P_ETIME] < 6u ? par[P_ETIME] : 0;
+        ec_xr = et == 1 || et == 3 ? 0.6667f : et == 5 ? 0.75f : 1.5f;
+    }
 }
 
 /* one sample of both: the input (a mono send) to the tape's heads (el, er) and the Echoplex (xl, xr) */
@@ -3521,8 +3576,10 @@ static inline void echoes(float in, float *el, float *er, float *xl, float *xr)
         if (d > (float)(TAPE_N - 4))
             d = (float)(TAPE_N - 4);
         h1 = tape_read(d);                       /* (the heads: what comes out, on its time) */
-        h3 = tape_read(fm_minf(d + 88.0f * fm_minf(ec_wd, 2.0f), (float)(TAPE_N - 4)));   /* (the classics pass: the
-                                                  * right's 8 ms later at Width 50, 16 at 100: the repeats wide) */
+        h3 = tape_read(fm_clampf(d * ec_xr + 88.0f * fm_minf(ec_wd, 2.0f), 2.0f, (float)(TAPE_N - 4)));   /* (engine
+                                                  * v2: the right's own time, 3:2 against the left's, the repeats
+                                                  * answering across; and 8 ms later at Width 50, 16 at 100, as
+                                                  * before) */
         f1 = tape_read(fm_maxf(d - (float)EAP_FB, 2.0f));   /* (and what goes round, the diffusers' delay earlier) */
         if (st_throw > 1e-4f) {                  /* (the second head: only while a throw rings) */
             h2 = tape_read(d * head2);
@@ -3541,10 +3598,18 @@ static inline void echoes(float in, float *el, float *er, float *xl, float *xr)
                                                   * past the knob) */
             g += (fm_minf(THR_FB + THR_HFB * hat_thr, fb_cap) - g) * thr_mx;   /* (a throw held: up towards THR_FB, the
                                                   * repeats stacking; the hats' a little further: zzr, the user's) */
-            tape_lp += tape_lpc * (f1 + fb_lean * st_throw * (f2 - f1) - tape_lp);   /* each time round: thinner, darker */
+            {   /* each time round: thinner, darker (engine v2: two poles, wandering; heads_step) */
+                const float x = f1 + fb_lean * st_throw * (f2 - f1), v3 = x - tl_s[1],
+                            v1 = tl_c[0] * tl_s[0] + tl_c[1] * v3, v2 = tl_s[1] + tl_c[1] * tl_s[0] + tl_c[2] * v3;
+                tl_s[0] = 2.0f * v1 - tl_s[0];
+                tl_s[1] = 2.0f * v2 - tl_s[1];
+                tape_lp = v2;
+            }
             tape_hp += tape_hpc * (tape_lp - tape_hp);
             fb = ec_fb(tape_lp - tape_hp);       /* (and more dissolved) */
-            w = ec_in(tape_acc * 0.25f) + 0.7f * sat(fb * g * (1.0f / 0.7f));
+            w = soft(4.0f * ec_in(tape_acc * 0.25f)) * 0.3f + 0.7f * sat(fb * g * (1.0f / 0.7f));   /* (engine v2: the
+                                                  * input driven, the dub sets' Echo at +5..+13 dB into its clipper: a
+                                                  * soft stab comes back nearly as loud as a hard one, the rain heard) */
             if (++tape_w >= TAPE_N)
                 tape_w = 0;
             tape[tape_w] = s16(w);
@@ -4032,7 +4097,8 @@ EN_COLD static void apply(int p, int v)
     case P_SIZE: pl_decay_t = 0.5f + 0.0045f * (float)v; break;      /* to 0.95 */
     case P_CUTOFF: case P_CCUT:                  /* 110 Hz .. 5.4 kHz (1.4.0, the user's: the knob around the piece's
                                                   * own, P_CUTOFF the recipe's; the filter's own ends past them) */
-        cut_base = 110.0f * fm_exp2f((float)(pe(P_CUTOFF) + pe(P_CCUT)) * 0.055f);
+        cut_base = 62.0f * fm_exp2f((float)(pe(P_CUTOFF) + pe(P_CCUT)) * 0.055f);   /* (engine v2: from 110, the
+                                                  * stab dark at rest, its envelope and velocity opening it) */
         break;
     case P_DECAY: case P_CVOICE: case P_CEDEC:   /* 60 ms .. 1.5 s (times the voice's); the filter's envelope, quicker */
         cvoice = (unsigned)par[P_CVOICE] < EN_NCV ? par[P_CVOICE] : 0;
@@ -4843,7 +4909,8 @@ static uint8_t kick_cut;                         /* (this block's kick went thro
 #define RB_SCR 0.25f                             /* (its release, s: a swell over the beat, its top before the next) */
 #endif
 #ifndef RB_K
-#define RB_K 50.0f                               /* (the level) */
+#define RB_K 35.0f                               /* (the level; engine v2: from 50, -3 dB: the kick held longer feeds it
+                                                  * more, its tail as loud as before) */
 #endif
 static int rb_ph;
 static uint32_t rb_rng = 0x2545F491u;
@@ -5002,6 +5069,8 @@ static void render_stabs(uint32_t n)
     const int alg = pt ? fm_alg_of(P_CALG, pt) : 0;
     const float cfb = pt ? fm_fb(P_CFB, pt) : 0.0f;
     float s0 = st_s[0], s1 = st_s[1], s2 = st_s[2], s3 = st_s[3], env = st_env, amp = st_amp, thr = st_throw;
+    float t0 = st_s2[0], t1 = st_s2[1], t2 = st_s2[2], t3 = st_s2[3];   /* (engine v2: the second stage's) */
+    float obl = st_od[0], obr = st_od[1], otl = st_od[2], otr = st_od[3];   /* (and the overdrive's) */
     float hl = st_h[0], hr = st_h[1], ll = st_lc[0], lr = st_lc[1], l2l = st_lc2[0], l2r = st_lc2[1];
     const int flp = LPF_MODE(0);
     const float lc = lcut[0], ce = 0.8f * sx[0][0] * mx_e[0], cp = 0.35f * sx[0][1] * mx_p[0],   /* (the strip: its Filter, its sends) */
@@ -5031,9 +5100,12 @@ static void render_stabs(uint32_t n)
     for (j = 0; j < n; j++) {
         float l = 0.0f, r = 0.0f, v1, v2, v3, yl, yr, e;
         if (!(j & 31u)) {                        /* the filter: its base, its envelope, the sweep */
-            float fc = cut_base * fm_exp2f(fe * st_fenv + 1.6f * arcm + st_cofs + lco + perf_sw + 0.3f * sl_ds * mod[0].v +
+            float fc = cut_base * fm_exp2f(fe * st_fenv + st_vofs + 1.6f * arcm + st_cofs + lco + perf_sw + 0.3f * sl_ds * mod[0].v +
                                            song_co + mx_co);   /* (the song's intro: darker, opening) */
-            svf_coefs(st_c, fm_clampf(fc, 90.0f, 12000.0f), k);
+            fc = fm_clampf(fc, 55.0f, 12000.0f);  /* (engine v2: down to 55 Hz, from 90: shut, the stab a murmur) */
+            svf_coefs(st_c, fc, k);
+            svf_coefs(st_c2, fm_minf(fc * 1.3f, 12000.0f), 1.5f);   /* (the second pole pair: 24 dB, a touch above,
+                                                  * no peak of its own) */
             st_fenv *= st_fdec;
             pc = st_fenv * st_fenv;              /* (Tonewheel: the percussion, quicker still) */
             if (pt)
@@ -5104,11 +5176,36 @@ static void render_stabs(uint32_t n)
         s2 = 2.0f * v1 - s2;
         s3 = 2.0f * v2 - s3;
         yr = v2;
+        v3 = yl - t1;                            /* (engine v2) the second stage, left */
+        v1 = st_c2[0] * t0 + st_c2[1] * v3;
+        v2 = t1 + st_c2[1] * t0 + st_c2[2] * v3;
+        t0 = 2.0f * v1 - t0;
+        t1 = 2.0f * v2 - t1;
+        yl = v2;
+        v3 = yr - t3;                            /* and right */
+        v1 = st_c2[0] * t2 + st_c2[1] * v3;
+        v2 = t3 + st_c2[1] * t2 + st_c2[2] * v3;
+        t2 = 2.0f * v1 - t2;
+        t3 = 2.0f * v2 - t3;
+        yr = v2;
         e = amp * g;
-        yl = sat(yl * e * 3.0f) * 0.4f;
-        yr = sat(yr * e * 3.0f) * 0.4f;
-        hl += 0.0225f * (yl - hl);               /* a gentle high-pass, ~160 Hz: the stabs out of the low-mids */
-        hr += 0.0225f * (yr - hr);
+        yl *= e * 3.0f;
+        yr *= e * 3.0f;
+        {   /* (engine v2) an overdrive after the filter, as the dub sets put Overdrive after a shut synth: what's above
+             * ~250 Hz driven hard, its tone ~5 kHz, a fifth of it under the stab; the filter dark, the grit in the mids */
+            float bl, br;
+            obl += 0.035f * (yl - obl);
+            obr += 0.035f * (yr - obr);
+            bl = soft(4.0f * (yl - obl) + 0.15f);
+            br = soft(4.0f * (yr - obr) + 0.15f);
+            otl += 0.5f * (bl - otl);
+            otr += 0.5f * (br - otr);
+            yl = sat(yl) * 0.4f + 0.075f * (otl - 0.149f);
+            yr = sat(yr) * 0.4f + 0.075f * (otr - 0.149f);
+        }
+        hl += 0.0125f * (yl - hl);               /* a gentle high-pass, ~90 Hz (engine v2: from ~160; the chord's body
+                                                  * kept, the bass's octave left to the bass) */
+        hr += 0.0125f * (yr - hr);
         yl -= hl;
         yr -= hr;
         if (lc > 0.0f) {                         /* (the strip's Filter, after the stabs' own: a high-pass or a
@@ -5135,6 +5232,14 @@ static void render_stabs(uint32_t n)
     st_s[1] = fm_flush(s1);
     st_s[2] = fm_flush(s2);
     st_s[3] = fm_flush(s3);
+    st_s2[0] = fm_flush(t0);
+    st_s2[1] = fm_flush(t1);
+    st_s2[2] = fm_flush(t2);
+    st_s2[3] = fm_flush(t3);
+    st_od[0] = fm_flush(obl);
+    st_od[1] = fm_flush(obr);
+    st_od[2] = fm_flush(otl);
+    st_od[3] = fm_flush(otr);
     st_h[0] = fm_flush(hl);
     st_h[1] = fm_flush(hr);
     st_lc[0] = lc > 0.0f ? fm_flush(ll) : 0.0f;
@@ -5162,6 +5267,8 @@ static void render_bass(uint32_t n)
     const int balg = BV_PATCH[bv] ? fm_alg_of(P_BALG, BV_PATCH[bv]) : 0;
     const float bfb = BV_PATCH[bv] ? fm_fb(P_BFB, BV_PATCH[bv]) : 0.0f;
     float ph = bass.ph, env = bass.env, inc, bite = bass_bite, bl = bass_lc, bl2 = bass_lc2;
+    float w1 = bass_sw[0], w2 = bass_sw[1], wc = 0.0f;   /* (engine v2: the Sub's warm layer) */
+    const float wd = 4.5f * fm_maxf(1.0f + 0.6f * xb, 0.2f);   /* (its filter's pluck, octave multiples: Bite deepens it) */
     int32_t gate = bass.gate;
     const int flp = LPF_MODE(2);
     const float lc = lcut[2], be = 0.35f * sx[2][0] * mx_e[2], bp = 0.04f * sx[2][1] * mx_p[2];   /* (the strip: Low cut, sends; its
@@ -5191,7 +5298,14 @@ static void render_bass(uint32_t n)
                 fm_ctl(&bfm, BV_PATCH[bv], balg, bi);
             x = fm_sample(&bfm, balg, bfb, 1.0f);
         } else {
-            x = sine(ph) + 0.2f * sine(2.0f * ph);
+            /* (engine v2) the Sub: the sine and its octave, and under them a saw through two poles at ~2.4 x the note,
+             * opened to ~7 x at each note and closing over ~70 ms (Bite's envelope): the dub sets' bass, a driven saw
+             * at 160 Hz over a sine, the warmth at 80..200 Hz a sine alone hasn't; its fundamental with the sine's */
+            if (!(j & 31u))
+                wc = 1.0f - fm_expf(-2.0f * FM_PI * inc * fm_minf(2.4f + wd * bite, 30.0f));
+            w1 += wc * (blep_saw(ph, inc) - w1);
+            w2 += wc * (w1 - w2);
+            x = sine(ph) + 0.12f * sine(2.0f * ph) - 0.6f * w2;
         }
         if (xs > 0.0f)                           /* Shape: towards a square, or back to a sine */
             x += xs * (sat(x * 4.0f) - x);
@@ -5226,6 +5340,8 @@ static void render_bass(uint32_t n)
             tsend[j] += sat(bassb[j] * 12.0f) * tb;
     }
     bass.ph = ph;
+    bass_sw[0] = fm_flush(w1);
+    bass_sw[1] = fm_flush(w2);
     bass_bite = fm_flush(bite);
     bass.env = fm_flush(env);
     bass.gate = gate;
@@ -5309,8 +5425,8 @@ static void render_hat(drum_t *v, uint32_t n, float g, float pl, float pr, float
         hp = in - x2 - 0.8f * x1;
         x1 += hf * hp;
         x2 += hf * x1;
-        lp += 0.65f * (hp - lp);
-        lp2 += 0.65f * (lp - lp2);
+        lp += KIT[kit].hat_lp * (hp - lp);       /* (engine v2: brighter, the kit's own; was 0.65 for all) */
+        lp2 += KIT[kit].hat_lp * (lp - lp2);
         x = lp2 * amp * att * g;
         if (lc > 0.0f) {
             x = lcut_step(x, lc, flp, &l1, &l2);
@@ -5372,7 +5488,10 @@ static void render_drums(uint32_t n)
             if (ph >= 1.0f)
                 ph -= 1.0f;
             inc += (v->inc_end - inc) * fall;
-            amp *= v->adec;
+            if (v->hold > 0)                     /* (engine v2: the body held, then the fall) */
+                v->hold--;
+            else
+                amp *= v->adec;
             att += (1.0f - att) * 0.05f;          /* (in over ~0.5 ms: softer) */
             clk *= 0.985f;
         }
@@ -5388,8 +5507,10 @@ static void render_drums(uint32_t n)
     }
     {   /* (Energy: the hats -6 dB down to +6 dB up) */
         const float hl = fm_exp2f((float)mac[EN_MAC_ENERGY] * (1.0f / 50.0f)) * hats_lvl;   /* (and Hats: +-12 dB) */
-        render_hat(&drum[1], n, gh * 0.16f * hl, 0.6f, 1.0f, 0.2f * de, ht, 0.6f, 0.02f);   /* shaker: a little right, soft, into the echo */
-        render_hat(&drum[2], n, gh * 0.17f * hl, 1.0f, 0.7f, 0.2f * de, ht, 1.0f, 0.3f);   /* open: a little left, some echo */
+        /* (engine v2: +1 dB, the hats brighter (KIT's hat_lp) and up a little: the dub sets' 6-12 kHz was 10+ dB over
+         * ours; more and the song's intros, K-weighted, fall under the main's, the introoutro scenario) */
+        render_hat(&drum[1], n, gh * 0.18f * hl, 0.6f, 1.0f, 0.2f * de, ht, 0.6f, 0.02f);   /* shaker: a little right, soft, into the echo */
+        render_hat(&drum[2], n, gh * 0.19f * hl, 1.0f, 0.7f, 0.2f * de, ht, 1.0f, 0.3f);   /* open: a little left, some echo */
     }
     v = &drum[3];                                /* the rim: two tones (~520 Hz, ~1.7 kHz) and a click of noise */
     if (v->on) {
@@ -6258,6 +6379,7 @@ static inline float mfx(float x, float *s)
 }
 
 static float ms_lp1, ms_lp2;                     /* the side's lows (mono below ~150 Hz) */
+static float gc_env, gc_g = 1.0f;               /* (engine v2) the master's glue: its level follower, its gain */
 static void render_chunk(int32_t *out, uint32_t n, float gain)
 {
     uint32_t j;
@@ -6436,6 +6558,16 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
             r += stt_mix * (v - r);
         }
 
+        {   /* (engine v2) the glue: the dub sets' master Glue Compressor, gently: 2:1 above -15 dBFS, ~10 ms in, ~150 ms
+             * out, linked; +0.5 dB back (the whole ~1 dB over 1.4's, the new stab and bass fuller). The mix breathes together, the kick and the stabs pull the wash down and let
+             * it swell back, the music denser (crest ~12 dB, down from 12-18; the sets' masters ~8) */
+            const float lv = fm_maxf(fm_fabsf(l), fm_fabsf(r));
+            gc_env += (lv - gc_env) * (lv > gc_env ? 0.0023f : 0.00015f);
+            if (!(j & 7u))                       /* (the gain every 8 samples: the follower is slow) */
+                gc_g = gc_env > 0.178f ? fm_exp2f(-0.5f * fm_log2f(gc_env * (1.0f / 0.178f))) : 1.0f;
+            l *= gc_g * 1.06f;
+            r *= gc_g * 1.06f;
+        }
         mpk[EN_MT_MASTER] = fm_maxf(mpk[EN_MT_MASTER], fm_maxf(fm_fabsf(l), fm_fabsf(r)));   /* (the master meter, the
                                                   * clip light: going into the soft clip) */
         {   /* (1.4.2: the level as heard, tr_level's: the mono sum above ~200 Hz, the kick's and the bass's weight
@@ -6482,6 +6614,7 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
         if (dlob < en_duck_lo[1])
             en_duck_lo[1] = dlob;
     }
+    gc_env = fm_flush(gc_env);
     duck_x = fm_flush(duck_x);
     duck_d = fm_flush(duck_d);
     duck_xb = fm_flush(duck_xb);

@@ -68,8 +68,10 @@ lvwatch
 wait 187000
 expect playing 0
 # (before: -5.1 LU, -3.2, -12.0)
-expect lvu10 <2
-expect lvin4 >-49
+# (engine v2: the ghost stabs make the main denser, its intro 0.6 LU further under: -5.5 LU, the classics' -11.5
+# dB still far below it; one bar more than 10 under, as the classics' 3)
+expect lvu10 <3
+expect lvin4 >-58
 expect lvout >-26
 expect lvoutend >-116
 # 3. a Segue, Pressure (Intro None, Main 32, Outro 16) into Haze: Haze from its second phrase, its kick and its bass
