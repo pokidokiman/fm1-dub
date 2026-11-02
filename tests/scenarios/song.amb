@@ -53,7 +53,7 @@ expect song 1
 expect songbo 48
 # the knobs as they were (the kick's Density, the hats' Hits, the Cutoff): the song's moves are around them
 expect par116 100
-expect par7 8
+expect par7 46
 expect par12 40
 wait 30000
 expect song 2

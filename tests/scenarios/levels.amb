@@ -137,7 +137,7 @@ expect par136 3
 spin K2 -5
 tap SEQ
 wait 300
-said Drums page, kit Tight: Kick Four, Hits 8, Shaker, Vary 0
+said Drums page, kit Tight: Kick Four, Hits 46, Offbeats, Vary 0
 shot drums_page.png
 spin K1 1
 wait 300
@@ -151,7 +151,9 @@ said Vary -8
 expect par137 -8
 spin K3 10
 # (format 32, the variety plan's step 4) Hits' zones: the shaker alone to 14, the open hat from 15, on every offbeat
-# from 40, the rim from 70
+# from 40, the rim from 70 (engine v3: Basic's Hits 46 now; back to 8 first, as it was)
+spin K2 -38
+wait 300
 spin K2 6
 wait 300
 said Hits 14, Shaker

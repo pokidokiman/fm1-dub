@@ -58,3 +58,28 @@ closing over ~70 ms (Bite deepens it): DT4's driven saw bass at 160 Hz. Warmth a
 - RAM: a few dozen floats; no new buffers.
 - Tests: `amb_test` ok; all 34 scenarios ok. Two expectations changed: the Saws' Env depth (4 octaves) and
   `introoutro`'s Pressure intro (-5.5 LU under its main, was -4.5; the ghosts make the main denser).
+
+## Engine v3: the arrangement (the songs)
+
+v2 fixed the sound; the songs were still static: Basic played 100 bars of one Full section, one shaker hit a bar, one
+chord change in three minutes. The Audioreakt sets do the opposite: the chord bed never stops, the kick and the bass
+leave for 16-bar breakdowns, layers come and go a block at a time, and one root holds for the whole track while its
+voicing moves every two bars.
+
+- **16-bar blocks.** Sections are picked only at a block's end. Motion's zones: under 25 Full only; from 25 a
+  departure from Full now and then (at least 32 bars of Full between), 25% of the chances at 25 to 75% at 100; from 40
+  more and more of them Breaks (none at 40, 75% from 80), each a block long, back to Full (now and then a Thin).
+- **Layers turning in Full.** At each block the shaker and the open hat both, or one alone (DT4's Shakers and 909
+  tracks), more often as Motion rises; never under 10, in a song's intro or outro, under Lock, or in the first 32 bars.
+  Motion's own random draws, so the notes are the same at any Motion under 25.
+- **The voicing breathes.** Every two bars the top voice goes a scale step up and back (m7 and m7sus4 in turn), the
+  root kept: DT5's chord memory, its +5 switched every two bars. Off when Change is on Hold, at Vary 0, on a slot's
+  written chord, in dub hold.
+- **Recipes.** Motion: Basic 70, Chamber 55, Steppers 75, Fog 60, Concrete 80, Night Drive 68, Pressure 78, Haze 50
+  (were 4-42). Hits: Basic 46 (was 8), Steppers 55, Night Drive 45, Pressure 50. `recipe_prints.h` regenerated, so a
+  saved piece never changed takes the new recipe.
+
+5 minutes of each: Basic Full 48, Break 16, Full 32, Thin 16, Full 32, Break; Pressure Full 48, Break 16, Full 32,
+Break 16, Full 32, Break. RAM: a few bytes. Tests: the Motion-zone checks moved to the new zones; the sound checks
+(rumble, strips, bass Low cut) set Motion 0 to measure the sound alone; the scenarios' Basic Hits starts and the host's
+old-format stores (recipes_before_v3) follow the new recipes.

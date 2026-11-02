@@ -1060,6 +1060,25 @@ static void lc_fold(int16_t *par, int n)        /* (before 28: the strips' Low c
  * as 1.4.0's test builds had them): every older format's store writes them where a piece has today's (a piece never
  * changed then known by its old recipe on the upgrade, as on a device); (format 35) a Vary and its trims changed, on
  * the old scale (the knob the amount itself), as near as they sound now (en_vary34 the way back) */
+/* (engine v3) the pieces' Motion and Hits as 1.4.3's recipes had them: an older format's store writes a piece at
+ * today's recipe as that build's recipe had it (the arrangement in 16-bar blocks raised Motion everywhere, and Basic's,
+ * Steppers', Night Drive's and Pressure's Hits) */
+static void recipes_before_v3(int mot, int hits)   /* (mot: where models_before5 won't; hits: where zones_back won't) */
+{
+    static const int16_t MO[NPIECES] = {12, 12, 8, 42, 16, 28, 8, 4}, HI[NPIECES] = {8, 41, 41, 41, 58, 33, 39, 33};
+    int16_t rec[P_NPARAMS];
+    uint16_t pl;
+    int i;
+    for (i = 0; i < NPIECES; i++) {
+        en_piece(i, rec, &pl);
+        if (mot && proj.slot[i].par[P_MOTION] == rec[P_MOTION])
+            proj.slot[i].par[P_MOTION] = MO[i];
+        if (hits && proj.slot[i].par[P_HITS] == rec[P_HITS])
+            proj.slot[i].par[P_HITS] = HI[i];
+    }
+    proj.par[P_MOTION] = proj.slot[proj.piece].par[P_MOTION];
+    proj.par[P_HITS] = proj.slot[proj.piece].par[P_HITS];
+}
 static void env_before36(void)                   /* (format 36, REPORT-stabenv) an older format's store: Env amount
                                                   * and the bass's old LFO's slot, Env decay's now, as the recipes had
                                                   * them then (0) where a piece has today's */
@@ -1257,6 +1276,8 @@ int main(int argc, char **argv)
         if (st_pre36) {                          /* (format 36) every older format's store: the envelope as before */
             keep();
             st_keep = proj;
+            recipes_before_v3(!st_pre5, !st_old);   /* (engine v3: today's Motion and Hits, 1.4.3's, where the older
+                                                  * stores' own conversions don't reach) */
             env_before36();
         }
         if (st_pre5)                             /* (step 5) every older format's store: the recipes before it */

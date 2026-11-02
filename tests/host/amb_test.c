@@ -1110,7 +1110,8 @@ int main(void)
      * the kick's off the phrase's line, no section; Sections (40-69) Thin and Groove join, no Break; Breaks (70-100)
      * Breaks join. Five minutes of Fog a run, four seeds */
     {
-        static const int MZ[6] = {0, 10, 20, 39, 55, 85};
+        static const int MZ[6] = {0, 10, 17, 24, 35, 85};   /* (engine v3: Breathes under 25, Sections from 25,
+                                                  * Breaks from 40) */
         uint32_t ev[6][EN_MO_N + 3], kline = 0;
         int z, sd, k;
         memset(ev, 0, sizeof ev);
@@ -1136,7 +1137,7 @@ int main(void)
                     run(0.1f);
                     if (en_mo_count[EN_MO_KICK] != kd && (en_phrase_bar == 0 || en_phrase_bar == 7))
                         kline++;
-                    if (en_bars / 16u != lastb && en_phrase_bar == 0) {   /* (a phrase begun: its section) */
+                    if (en_bars / 16u != lastb && en_phrase_bar == 0) {   /* (a block begun: its section) */
                         lastb = en_bars / 16u;
                         if (en_section != SEC_FULL)
                             ev[z][EN_MO_N + (en_section == SEC_BREAK ? 2 : 1)]++;
@@ -1155,22 +1156,22 @@ int main(void)
             CHECK(ev[z][EN_MO_N + 1] == 0 && ev[z][EN_MO_N + 2] == 0 && ev[z][EN_MO_KICK] > 0,
                   "Breathes (Motion %d): a section, or no kick drop-out", MZ[z]);
         CHECK(ev[1][EN_MO_KICK] + ev[1][EN_MO_OUT] + ev[1][EN_MO_SWELL] < ev[3][EN_MO_KICK] + ev[3][EN_MO_OUT] + ev[3][EN_MO_SWELL],
-              "Breathes growing: Motion 10 no quieter than 39");
-        CHECK(ev[3][EN_MO_KICK] >= 4u && ev[3][EN_MO_KICK] <= 24u,
-              "Motion 39: the kick out about Coldest Season's 2-3 times in 5 minutes (%u in 4 x 5)", ev[3][EN_MO_KICK]);
+              "Breathes growing: Motion 10 no quieter than 24");
+        CHECK(ev[3][EN_MO_KICK] >= 2u && ev[3][EN_MO_KICK] <= 24u,
+              "Motion 24: the kick out about Coldest Season's 2-3 times in 5 minutes (%u in 4 x 5)", ev[3][EN_MO_KICK]);
         CHECK(kline == 0, "the kick's drop-outs off the phrase's line (%u on its first or last bar)", kline);
-        CHECK(ev[4][EN_MO_N + 1] > 0 && ev[4][EN_MO_N + 2] == 0, "Sections (Motion 55): Thin or Groove, no Break");
+        CHECK(ev[4][EN_MO_N + 1] > 0 && ev[4][EN_MO_N + 2] == 0, "Sections (Motion 35): Thin or Groove, no Break");
         CHECK(ev[5][EN_MO_N + 2] > 0, "Breaks (Motion 85): a Break");
     }
-    /* (format 31) under 40 the arrangement's draws are Motion's own: Motion 10 and 30 play the same notes (the stabs,
-     * the chords), only the moves and the kick's drop-outs differ */
+    /* (format 31) under 25 (engine v3; 40 before) the arrangement's draws are Motion's own: Motion 10 and 20 play the same
+     * notes (the stabs, the chords), only the moves and the kick's drop-outs differ */
     {
         fresh();
         en_seed(3);
         en_regrow();
         en_play(1);
         run(0.05f);
-        CHECK(same_notes(P_MOTION, 10, 30, 180.0f), "Motion 10 and 30: other notes");
+        CHECK(same_notes(P_MOTION, 10, 20, 180.0f), "Motion 10 and 20: other notes");
     }
     /* (format 31) a save before 31: its Motion and Mixer as Motion (en_motion30) */
     {
@@ -1645,7 +1646,7 @@ int main(void)
             fresh();
             en_seed(9);
             en_set(P_TEMPO, 140);
-            en_set(P_MOTION, k ? 35 : 0);
+            en_set(P_MOTION, k ? 20 : 0);
             en_set(P_MOVE, k ? 0 : 30);
             en_play(1);
             while (en_bars < 16u * 121u) {
@@ -1656,7 +1657,7 @@ int main(void)
                 }
             }
         }
-        printf("  the filter's sweep in Full: Motion 0, Drift 30: %.2f .. %.2f; Motion 35, Drift 0: %.2f .. %.2f\n",
+        printf("  the filter's sweep in Full: Motion 0, Drift 30: %.2f .. %.2f; Motion 20, Drift 0: %.2f .. %.2f\n",
                (double)lo[0], (double)hi[0], (double)lo[1], (double)hi[1]);
         CHECK(hi[0] - lo[0] > 0.3f && hi[1] - lo[1] < 0.05f, "the sweep follows Motion, not the Drift: %.2f, %.2f",
               (double)(hi[0] - lo[0]), (double)(hi[1] - lo[1]));
@@ -2015,6 +2016,7 @@ int main(void)
                     en_set(k, pp[k]);
             en_pool(pl);
             en_set(P_RUMBLE, 0);
+            en_set(P_MOTION, 0);                 /* (engine v3: the pieces' Motion up; the sound alone measured here) */
             en_regrow();
             en_play(1);
             run(8.0f);
@@ -2102,6 +2104,7 @@ int main(void)
         en_pool(pl);
         en_set(P_PINGS, 80);
         en_set(P_CRACKLE, 80);
+        en_set(P_MOTION, 0);                     /* (engine v3: the pieces' Motion up; the sound alone measured here) */
         en_regrow();
         en_play(1);
         run(4.0f);

@@ -344,7 +344,7 @@ expect par163 60
 turn PRESET 6
 wait 300
 expect piece 6
-expect par15 8
+expect par15 78
 turn PRESET -6
 wait 300
 expect piece 0

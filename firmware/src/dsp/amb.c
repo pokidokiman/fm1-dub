@@ -134,7 +134,7 @@ static const struct {
     const char *name;
     int16_t v[P_NPARAMS];
 } PIECES[EN_NPIECES] = {
-    {"Basic",      {52, 30, 68, 80, 30, 50, 5, 8, 55, 1, 35, 62, 40, 25, 40, 12, 0, 1, 122, 5, 1, 0,
+    {"Basic",      {52, 30, 68, 80, 30, 50, 5, 46, 55, 1, 35, 62, 40, 25, 40, 70, 0, 1, 122, 5, 1, 0,
                     0, 0, 1, 20, 5, 50, 3, 8, 50, 55, 30, 0, 0, 0,
                     0, 0, 0, -25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 31,
@@ -156,7 +156,7 @@ static const struct {
                     0,
                     0, 4, 20, 4, 1, 45, 100,
                     50, -2, 5, 45, 0}},   /* (the user's, 2026-10-28: Basic's sweep the faster pace, 6-20 too static) */
-    {"Chamber",    {55, 20, 62, 72, 20, 31, 6, 41, 70, 4, 45, 72, 50, 55, 30, 12, 0, 1, 128, 9, 5, 0,
+    {"Chamber",    {55, 20, 62, 72, 20, 31, 6, 41, 70, 4, 45, 72, 50, 55, 30, 55, 0, 1, 128, 9, 5, 0,
                     2, 0, 0, 10, 0, 40, 1, 12, 45, 70, 45, 2, 0, 1,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -178,7 +178,7 @@ static const struct {
                     0,
                     0, 4, 20, 4, 0, 55, 63,
                     30, -25, 50, 25, 1}},
-    {"Steppers",   {52, 35, 80, 82, 35, 58, 6, 41, 50, 1, 30, 50, 55, 25, 50, 8, 0, 1, 126, 2, 1, 0,
+    {"Steppers",   {52, 35, 80, 82, 35, 58, 6, 55, 50, 1, 30, 50, 55, 25, 50, 75, 0, 1, 126, 2, 1, 0,
                     0, 0, 2, 35, 45, 60, 2, 5, 60, 50, 20, 1, 1, 2,
                     0, 0, 0, -30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 35, 0, 0, 0, 0, 0, 0, 0, 31,
@@ -200,7 +200,7 @@ static const struct {
                     0,
                     0, 4, 20, 4, 1, 20, 88,
                     35, 11, 21, 35, 1}},
-    {"Fog",        {50, 34, 58, 62, 40, 82, 5, 41, 75, 2, 55, 72, 46, 80, 25, 42, 0, 1, 120, 7, 5, 0,
+    {"Fog",        {50, 34, 58, 62, 40, 82, 5, 41, 75, 2, 55, 72, 46, 80, 25, 60, 0, 1, 120, 7, 5, 0,
                     3, -1, 0, 15, 0, 30, 1, 30, 35, 80, 60, 0, 0, 3,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 35, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -222,7 +222,7 @@ static const struct {
                     0,
                     0, 4, 20, 4, 0, 90, 100,
                     100, -12, -15, 24, 1}},
-    {"Concrete",   {58, 45, 70, 85, 25, 86, 5, 58, 50, 1, 25, 62, 60, 20, 60, 16, 0, 1, 136, 0, 7, 0,
+    {"Concrete",   {58, 45, 70, 85, 25, 86, 5, 58, 50, 1, 25, 62, 60, 20, 60, 80, 0, 1, 136, 0, 7, 0,
                     6, 0, 4, 30, 10, 75, 3, 5, 50, 45, 15, 2, 3, 2,
                     0, 0, 0, -15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 75, 0, 0, 0, 0, 0, 0, 0, 25,
@@ -244,7 +244,7 @@ static const struct {
                     0,
                     0, 4, 20, 4, 1, 90, 100,
                     90, 50, -6, 50, 1}},
-    {"Night Drive", {48, 45, 68, 78, 45, 82, 4, 33, 60, 3, 35, 65, 50, 40, 45, 28, 0, 1, 120, 10, 1, 0,
+    {"Night Drive", {48, 45, 68, 78, 45, 82, 4, 45, 60, 3, 35, 65, 50, 40, 45, 68, 0, 1, 120, 10, 1, 0,
                     1, 0, 1, 25, 13, 55, 2, 15, 50, 60, 35, 4, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 45, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -266,7 +266,7 @@ static const struct {
                     0,
                     0, 4, 20, 4, 0, 45, 100,
                     85, 25, 30, 40, 1}},
-    {"Pressure",   {55, 20, 75, 92, 20, 76, 6, 39, 55, 1, 20, 55, 48, 30, 35, 8, 0, 1, 126, 4, 2, 0,
+    {"Pressure",   {55, 20, 75, 92, 20, 76, 6, 50, 55, 1, 20, 55, 48, 30, 35, 78, 0, 1, 126, 4, 2, 0,
                     5, 0, 1, 10, 5, 65, 2, 30, 70, 40, 40, 3, 4, 1,
                     0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 35, 0, 0, 0, 0, 0, 0, 0, 12,
@@ -288,7 +288,7 @@ static const struct {
                     0,
                     0, 4, 20, 4, 1, 40, 75,
                     50, 3, -3, 15, 1}},
-    {"Haze",       {45, 42, 58, 55, 50, 40, 5, 33, 80, 3, 60, 70, 45, 80, 25, 4, 0, 1, 116, 3, 0, 1,
+    {"Haze",       {45, 42, 58, 55, 50, 40, 5, 33, 80, 3, 60, 70, 45, 80, 25, 50, 0, 1, 116, 3, 0, 1,
                     3, 0, 0, 20, 10, 35, 1, 20, 30, 85, 70, 2, 0, 4,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -1375,9 +1375,10 @@ EN_COLD static int bell_note(int l, int off)            /* a loop slot's note, f
 /* the chord to the four voices: the voicing on the degree, its root moved the least from the last one,
  * in C3..B3 (as a chord memory: the shape kept, transposed whole; 1.3.0 up from F#2..F3, out of the low-mids) */
 static int chord_slot = -1;                     /* the slot whose chord sounds (-1: one of the scale) */
+static uint8_t vbreath;                          /* (engine v3) the voicing's breath: its top voice a step up, now */
 EN_COLD static void voice_chord(void)
 {
-    int iv[4], i, pc, n;
+    int iv[4], i, pc, n;   /* (engine v3: vbreath, its top voice's breath) */
     if (chord_slot >= 0 && par[P_CQ0 + chord_slot]) {   /* a slot's chord, as written */
         int r = par[P_CR0 + chord_slot];
         en_chord_iv(par[P_CQ0 + chord_slot], par[P_CX0 + chord_slot], iv);
@@ -1398,6 +1399,16 @@ EN_COLD static void voice_chord(void)
         en_voicing(pool, deg, shape, iv);
     }
     en_chord_slot = (int8_t)chord_slot;
+    if (vbreath && chord_slot < 0) {             /* (engine v3: the top voice the next scale step up, if one is near; a
+                                                  * slot's chord, written, left as written) */
+        const int rr = (chord_pcs[0] - par[P_ROOT] + 120) % 12;
+        int k;
+        for (k = 1; k <= 2; k++)
+            if (pool >> ((rr + iv[3] + k) % 12) & 1u) {
+                iv[3] += k;
+                break;
+            }
+    }
     pc = chord_pcs[0];
     n = root_note + ((pc - root_note) % 12 + 12) % 12;
     if (n - root_note > 6)
@@ -2802,19 +2813,25 @@ static uint8_t nz_now;                          /* (the noise's Density turned: 
 static uint8_t kick_hand;                       /* (and from then on, the piece's opening on four left be: the knob's) */
 EN_COLD static int section_pick(void)
 {
-    const int mv = par[P_MOTION];                /* (the zones in whole steps: 40 Sections' first, 70 Breaks') */
+    /* (engine v3, the Audioreakt sets' arrangements: the music moves in 16-bar blocks, picked here only at a block's
+     * end (bar_start); the chords never stop, the kick and the bass leave for a 16-bar breakdown every 48-80 bars.
+     * Motion: under 25 Full only (its layers still turning, bar_start); from 25 a block departs from Full now and
+     * then, at least two blocks (32 bars) of Full between, more often as Motion rises (25% of the chances at 25, 75%
+     * at 100); from 40 the departures are Breaks more and more (none at 40, 75% from 80), the rest a Groove or a Thin.
+     * A Break lasts a block and gives way to Full, now and then a Thin, never a second Break) */
+    const int mv = par[P_MOTION];
     float r = frand(), m, mb;
-    if (mv < 40)
+    if (mv < 25)
         return SEC_FULL;
-    mb = (float)(mv > 70 ? mv - 70 : 0) * (1.0f / 30.0f);   /* (Breaks: 0 at 70, 1 at 100) */
-    if (sec != SEC_FULL)                         /* back, mostly; from a Break, a Thin now and then */
-        return r < 0.75f ? SEC_FULL : sec == SEC_BREAK ? SEC_THIN : mv >= 70 && frand() < 0.8f * mb ? SEC_BREAK : sec;
+    if (sec != SEC_FULL)
+        return sec == SEC_BREAK ? (r < 0.8f ? SEC_FULL : SEC_THIN) : (r < 0.85f ? SEC_FULL : sec);
     if (sec_age < 4)
         return SEC_FULL;
-    m = (float)(mv < 70 ? mv - 40 : 30) * (1.0f / 30.0f);
-    if (r >= 0.05f + 0.45f * m + 0.15f * mb)
+    m = (float)(mv - 25) * (1.0f / 75.0f);
+    if (r >= 0.25f + 0.5f * m)
         return SEC_FULL;
-    if (mv >= 70 && frand() < 0.6f * mb)
+    mb = fm_clampf((float)(mv - 40) * (1.0f / 40.0f), 0.0f, 0.75f);
+    if (frand() < mb)
         return SEC_BREAK;
     return frand() < 0.5f ? SEC_GROOVE : SEC_THIN;
 }
@@ -2937,6 +2954,24 @@ EN_COLD static void ph_bar(int pb)
     }
 }
 
+/* (engine v3) a Full block's top: which hats play, as the Audioreakt sets bring their shaker and 909 tracks in and
+ * out a block at a time while the kick runs: both most of the time, the shaker or the open hat alone now and then (as
+ * Motion rises; never under 10, nor in a song's intro or outro, nor under Lock) */
+static uint8_t blk_hats = 1, blk_open = 1;
+EN_COLD static void block_layers(void)
+{
+    const int main = song_ph == EN_SG_OFF || song_ph == EN_SG_MAIN;
+    blk_hats = blk_open = 1;
+    if (par[P_MOTION] >= 10 && main && !lock && bar >= 32u) {
+        const float r = mo_u(), p = 0.15f + 0.35f * fm_minf(motion, 1.0f);   /* (Motion's own draw: the notes left be) */
+        if (r < 0.35f * p)
+            blk_hats = 0;                        /* the open hat alone: space */
+        else if (r < p)
+            blk_open = 0;                        /* the shaker alone: tight */
+    }
+    lay_hats = blk_hats;
+    lay_open = blk_open;
+}
 EN_COLD static void bar_start(void)
 {
     int pb = (int)(bar & 7u), db = en_drift_bars(par[P_DRIFT]);
@@ -2947,6 +2982,12 @@ EN_COLD static void bar_start(void)
     if (pb == 0 && bar > 0) {
         section_set(sec_next);
         sec_age = sec != SEC_FULL ? 0 : sec_age < 255 ? sec_age + 1 : 255;
+        if (sec == SEC_FULL && (bar & 15u) == 0u)   /* (engine v3: a new block) */
+            block_layers();
+        else if (sec == SEC_FULL) {             /* (the block's own, kept through its second phrase) */
+            lay_hats = blk_hats;
+            lay_open = blk_open;
+        }
         ph_age = ph_reset ? 0 : ph_age < 255 ? ph_age + 1 : 255;   /* (phrases since the kick or the plan changed) */
         ph_reset = 0;
         if (!lock) {                             /* (Lock: the kick's shape, the noise's groove, the plan, kept) */
@@ -2995,7 +3036,7 @@ EN_COLD static void bar_start(void)
         arc_tgt = 1.0f, arc_tau = 2.2f * 16.0f * step_len;
     fill = 0;
     if (pb == 7) {
-        sec_next = (uint8_t)section_pick();
+        sec_next = (uint8_t)((bar & 15u) == 15u ? section_pick() : sec);   /* (engine v3: a block, 16 bars) */
         /* the last bar before the kick: a fill (the kick drops out halfway, the last stab is thrown) */
         /* (the classics pass: under Motion 40 none, the kick never leaving; then into or out of a change, or now and
          * then as Motion rises) */
@@ -3029,6 +3070,13 @@ EN_COLD static void bar_start(void)
     if (!en_frozen && (change_pending || (db && bar > 0 && chord_bars >= (uint32_t)db))) {
         change_pending = 0;
         chord_change();
+    } else if (!en_frozen && db && (bar & 1u) == 0u && bar > 0 && lay_a[VY_CHORD] > 0.0f) {   /* (Change on Hold: the
+                                                  * chord held, its breath too) */
+        /* (engine v3) the voicing breathes, every two bars: its top voice up a step of the scale and back (a minor
+         * seventh's tenth to its eleventh: m7 and m7sus4 in turn), the root kept: Audioreakt's Dub Techno 5, its chord
+         * memory's +5 switched on and off every two bars, one chord for the whole track and still moving */
+        vbreath ^= 1u;
+        voice_chord();
     }
     en_drift = db ? fm_clampf((float)chord_bars / (float)db, 0.0f, 1.0f) : 0.0f;
     chord_bars++;
