@@ -878,16 +878,20 @@ sounds, tempo, key and mode, the groove, the space, how busy it is and how far i
 remembers how you left it. Hold GLO for 1.5 s to put the piece you're on back to its recipe.
 Tune, MIDI out, Lights, the Song mode, a set's Transition, Values and the dub sirens' knobs are the same for all.
 
+(Engine v3: Reakt 4, Reakt 5, Riemann 12 and Riemann 13 take the places of Chamber, Fog, Concrete and Haze. A saved
+piece you never changed in those places becomes the new one; one you changed keeps your settings. Elsewhere this manual
+still gives some of the old pieces' numbers.)
+
 | Piece | What it is |
 |---|---|
 | **Basic** | F Dorian, 122, after Basic Channel's *BCD*: held, saw stabs, short, into a clean dotted-eighth echo, the dry forward, almost no hats, narrow and dark, the kick on the floor; a new chord every 64 bars. |
-| **Chamber** | A minor, 128, after Fluxion's *Vibrant Forms*: one chord that never moves (Change on Hold), warm organ stabs up front, a long half-note echo, a drone bass, a ghosted four (two and four soft), the steadiest loop, the noise ringing on the key (Room). |
+| **Reakt 4** | F minor, 140, after Audioreakt's *Dub Techno 4* template: one stab a bar with a rain of soft, dark ghost stabs under it, a syncopated bass (Skip), sixteenth shakers accented on each beat's third sixteenth, open hats on the "ands", a 909-style rim, the kick with a little plate; dotted-eighth echo, long tails; 16-bar blocks, Breaks (Motion 72). |
 | **Steppers** | D Dorian, 126, after Maurizio's *M-Series*: the most frozen loop, one chord held, short saw stabs, a dotted bass, the open hat on the four "ands", real swing, clean. |
-| **Fog** | G minor, 120, after Echospace's *The Coldest Season*: pad stabs lost in a quarter-note echo and a big plate, very wide, hiss (Tape), offbeat hats, a drone bass, a kick that comes and goes, a Thin or a Groove now and then (Motion 42), no Breaks; the chord moves every 64 bars. |
-| **Concrete** | C pentatonic minor, 136, after Monolake's *Hongkong*: the fastest. Chords stacked in fourths, short bright noise stabs, glassy pings over them, a rolling bass, loud hats, a clean dotted-eighth echo, deep filter sweeps, a vinyl crackle. |
+| **Reakt 5** | G minor, 125, after Audioreakt's *Dub Techno 5* template: the stab on the one, longer, a rolling eighth-note bass (Rolling), offbeat hats with a sixteenth pickup, bongo-style rims on every eighth, claps on two and four, a tape-noise bed (Tape); 16-bar blocks, Breaks (Motion 74). |
+| **Riemann 12** | B minor, 120, after the Riemann *Dub Techno Template 12*: two stabs a bar, an offbeat bass, a groove kick on three's "and", claps on two and four with a third thrown into the echo, hats on the beats and the offbeats, high feedback; 16-bar blocks (Motion 66). |
 | **Night Drive** | Bb Dorian, 120, after Intrusion's *The Seduction of Silence*: FM keys, more pings, an offbeat sub bass, a dotted-quarter echo, very wide, a filter that's played and LFOs that wander far; parts ridden out and back now and then, the kick out for a bar or two (Motion 28), no sections; a new chord every 32 bars. |
 | **Pressure** | E Phrygian, 126, after Porter Ricks' *Biokinetics*: it never breaks; the kick and the bass forward, one chord held, a wide tape-noise bed under it, wide. |
-| **Haze** | Eb major, 116: the sparse intro. Pad stabs, the longest, the most echo, pings an octave up and the most of them, a kick that comes and goes, dry and dusty (Dust), wide; the loop held (Motion 4), no sections. |
+| **Riemann 13** | E minor, 120, after the Riemann *Dub Techno Template 13*: pad stabs, a dotted bass, percussion on two and four, a loop of sixteenths, the most echo and plate, a soft kick; 16-bar blocks (Motion 62). |
 
 The pieces' echo tails run from about 4 to 8 seconds.
 
@@ -1777,7 +1781,7 @@ The defaults are Basic's; each piece has its own.
 | Noise LFO | Wave | 0–100 (0 the wander alone, 50 half each, 100 the wave alone, a sine) | 56 |
 | Noise LFO | Rate | 1, 2, 4, 8, 16, 32 bars | 4 bars |
 | Noise LFO | Target | Filter (on the whole noise, closing up to 3.5 octaves), Tone, Air | Filter |
-| Bass | Groove | Drone, Offbeat, Dotted, Sync, Roller | Offbeat |
+| Bass | Groove | Drone, Offbeat, Dotted, Sync, Roller, Skip, Rolling | Offbeat |
 | Bass | Vary | −50–+50, a trim on Form's Vary (Hold – 0 as Form's – +50) | 0 |
 | Bass | Density | 0–100 (0 the bar's first note – 100 every note) in two zones (Sparse 0–29, Pickups 30–100) | 100 |
 | Bass | Fifth | 0–100 | 20 |

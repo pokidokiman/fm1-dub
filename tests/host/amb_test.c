@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "amb.h"
+#include "../../host/recipes_143.h"   /* (engine v3: the replaced pieces, for the knob tests) */
 
 static int fails;
 #define CHECK(c, ...)                                                                                              \
@@ -324,6 +325,15 @@ static int dead_steps(int pc, int p, int mac, int lo, int hi, float secs, int *f
                 if (k != P_TUNE && k != P_MIDI)
                     en_set(k, pp[k]);
             en_pool(pl);
+            if (pc == 1 || pc == 3 || pc == 4 || pc == 7) {   /* (engine v3: Chamber's, Fog's, Concrete's and Haze's
+                                                  * slots are Reakt 4, Reakt 5, Riemann 12 and Riemann 13 now; these
+                                                  * steps measured on the pieces they were written for, as 1.4.3 had
+                                                  * them) */
+                for (k = 0; k < P_NPARAMS; k++)
+                    if (k != P_TUNE && k != P_MIDI)
+                        en_set(k, RECIPE143[pc][k]);
+                en_pool(EN_MODE_POOL[RECIPE143[pc][P_MODE]]);
+            }
             for (k = 0; k < EN_NMAC; k++)        /* (the master actions, the mutes, the moves, Lock, the effects as at
                                                   * boot: a test before may have left one) */
                 en_macro(k, 0);

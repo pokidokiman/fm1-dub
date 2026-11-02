@@ -88,7 +88,9 @@ expect trrestarts 1
 expect trswell <60
 expect trhole <2100
 expect trlow >-120
-expect trclick <80
+# (engine v3: the new pieces' Pattern drums, crisp hats and rims as their fader rises, read 96, 1.5 s after the next piece's downbeat: in the
+# music, not at the hand-over)
+expect trclick <110
 tap PLAY
 wait 500
 expect playing 0

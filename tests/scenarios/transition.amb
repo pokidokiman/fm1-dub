@@ -74,7 +74,7 @@ expect piece 1
 expect playing 1
 expect song 1
 expect trrestarts 1
-expect bpm 128
+expect bpm 140
 wait 10000
 expect playing 1
 expect trquiet <2000
@@ -120,7 +120,7 @@ wait 8000
 expect bpm >118
 expect bpm <124
 wait 8800
-expect bpm 116
+expect bpm 120
 wait 3000
 expect piece 7
 expect playing 1

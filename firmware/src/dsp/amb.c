@@ -44,7 +44,7 @@ static const en_param_t PARAMS[P_NPARAMS] = {
     {"Cutoff", 0, 100, 45},   {"Decay", 0, 100, 35},    {"Ping tone", 0, 100, 40}, {"Motion", 0, 100, 50},
     {"Tune", -50, 50, 0},     {"MIDI out", 0, 1, 1},    {"Tempo", 40, 140, 122},  {"Root", 0, 11, 5},
     {"Mode", 0, EN_NMODES - 1, MODE_DORIAN}, {"Ping oct", -2, 2, 0}, {"Chord voice", 0, EN_NCV - 1, 0},
-    {"Bass oct", -1, 1, 0},   {"Groove", 0, 4, 1},      {"Fifth", 0, 100, 20},
+    {"Bass oct", -1, 1, 0},   {"Groove", 0, 6, 1},      {"Fifth", 0, 100, 20},
     {"Swing", 0, 100, 10},    {"Hats", 0, 100, 50},
     {"Stabs", 1, 6, 3},       {"Crackle", 0, 100, 35},  {"Duck", 0, 100, 50},     {"Size", 0, 100, 55},
     {"Cloud", 0, 100, 30},
@@ -156,28 +156,28 @@ static const struct {
                     0,
                     0, 4, 20, 4, 1, 45, 100,
                     50, -2, 5, 45, 0}},   /* (the user's, 2026-10-28: Basic's sweep the faster pace, 6-20 too static) */
-    {"Chamber",    {55, 20, 62, 72, 20, 31, 6, 41, 70, 4, 45, 72, 50, 55, 30, 55, 0, 1, 128, 9, 5, 0,
-                    2, 0, 0, 10, 0, 40, 1, 12, 45, 70, 45, 2, 0, 1,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    {"Reakt 4",  {52, 10, 72, 84, 30, 66, 5, 50, 62, 1, 40, 66, 38, 30, 40, 72, 0, 1, 140, 5, 5, 0,
+                    0, 0, 5, 0, 4, 50, 1, 30, 62, 72, 35, 0, 0, 0,
+                    0, 0, 0, -25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 31,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 100, 100, 100, 5, 50, 0,
-                    -7, 43, 78, 0, 3,
-                    70, 60, 100, 55,
-                    35, 75, 50, 50, 60, 50,
+                    4369, -1, 17476, 9289, 0, 4369, 17476, 17476, 65, 0, 100, 80, 100, 70, 0, 60, 1,
+                    0, 56, 66, 0, 2,
+                    70, 70, 100, 55,
+                    45, 100, 25, 50, 40, 50,
                     50, 50, 50, 0,
-                    30, 35,
-                    2, 3,
-                    0, 55,
-                    25, 25,
+                    25, 21,
+                    2, 2,
+                    51, 56,
+                    45, 20,
                     0, 0,
-                    0, 0, -31, -31, 0,
+                    0, 0, 0, 0, 0,
                     50, 50, 50, 50, 0, 50, 50, 50,
                     0, 0, 0, 0, 0,
-                    50, 0, 0, 0,
+                    50, 0, 25, 0,
                     0,
-                    0, 4, 20, 4, 0, 55, 63,
-                    30, -25, 50, 25, 1}},
+                    0, 4, 20, 4, 1, 45, 100,
+                    50, -2, 5, 45, 0}},
     {"Steppers",   {52, 35, 80, 82, 35, 58, 6, 55, 50, 1, 30, 50, 55, 25, 50, 75, 0, 1, 126, 2, 1, 0,
                     0, 0, 2, 35, 45, 60, 2, 5, 60, 50, 20, 1, 1, 2,
                     0, 0, 0, -30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -200,50 +200,50 @@ static const struct {
                     0,
                     0, 4, 20, 4, 1, 20, 88,
                     35, 11, 21, 35, 1}},
-    {"Fog",        {50, 34, 58, 62, 40, 82, 5, 41, 75, 2, 55, 72, 46, 80, 25, 60, 0, 1, 120, 7, 5, 0,
-                    3, -1, 0, 15, 0, 30, 1, 30, 35, 80, 60, 0, 0, 3,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 35, 0, 0, 0, 0, 0, 0, 0, 0,
+    {"Reakt 5",  {55, 10, 76, 88, 20, 58, 5, 50, 58, 1, 48, 58, 42, 45, 35, 74, 0, 1, 125, 7, 5, 0,
+                    0, 0, 6, 30, 6, 65, 1, 35, 66, 78, 45, 3, 0, 0,
+                    8, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 35, 0, 0, 0, 0, 0, 0, 0, 12,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 100, 100, 100, 5, 50, 0,
+                    4369, -15292, 17476, 21845, 4112, 4369, 17476, 17476, 17476, 4112, 100, 100, 100, 90, 100, 55, 1,
                     -13, 43, 75, 10, 1,
-                    70, 65, 100, 50,
-                    55, 75, 50, 50, 85, 50,
+                    70, 70, 100, 55,
+                    60, 100, 50, 50, 75, 50,
                     85, 50, 50, 0,
                     0, 62,
                     5, 2,
-                    48, 0,
-                    90, 50,
-                    -28, 0,
-                    -28, 8, 8, -20, 0,
+                    56, 0,
+                    45, 50,
+                    -45, 0,
+                    -45, -3, -45, -14, 0,
                     50, 50, 50, 50, 0, 50, 50, 50,
                     0, 0, 0, 0, 0,
                     50, 0, 0, 0,
                     0,
-                    0, 4, 20, 4, 0, 90, 100,
-                    100, -12, -15, 24, 1}},
-    {"Concrete",   {58, 45, 70, 85, 25, 86, 5, 58, 50, 1, 25, 62, 60, 20, 60, 80, 0, 1, 136, 0, 7, 0,
-                    6, 0, 4, 30, 10, 75, 3, 5, 50, 45, 15, 2, 3, 2,
-                    0, 0, 0, -15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 75, 0, 0, 0, 0, 0, 0, 0, 25,
+                    0, 4, 20, 4, 1, 40, 75,
+                    50, 3, -15, 15, 1}},
+    {"Riemann 12", {52, 15, 74, 84, 35, 55, 4, 45, 66, 1, 42, 74, 48, 35, 50, 66, 0, 1, 120, 11, 5, 0,
+                    0, 0, 1, 10, 0, 60, 2, 20, 55, 65, 30, 1, 0, 0,
+                    0, 0, 0, -30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 35, 0, 0, 0, 0, 0, 0, 0, 31,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 100, 100, 100, 5, 50, 0,
-                    0, 56, 66, 10, 0,
-                    70, 65, 80, 65,
-                    50, 100, 20, 50, 55, 50,
+                    20753, -28399, 17476, 0, 20496, 4369, 0, 17476, 0, 4112, 100, 100, 100, 0, 100, 55, 1,
+                    5, 62, 61, 0, 0,
+                    70, 70, 100, 50,
+                    50, 100, 30, 50, 45, 50,
                     50, 50, 50, 0,
-                    45, 56,
-                    2, 1,
-                    76, 64,
-                    75, 25,
-                    -2, 0,
-                    0, 0, 0, 4, 0,
-                    50, 50, 50, 50, 0, 50, 50, 50,
+                    30, 14,
+                    1, 2,
+                    59, 60,
+                    35, 20,
+                    0, 0,
+                    0, 0, -33, 0, 0,
+                    50, 50, 50, 50, 0, 50, 65, 50,
                     0, 0, 0, 0, 0,
                     50, 0, 0, 0,
                     0,
-                    0, 4, 20, 4, 1, 90, 100,
-                    90, 50, -6, 50, 1}},
+                    0, 4, 20, 4, 1, 20, 88,
+                    35, 11, 21, 35, 1}},
     {"Night Drive", {48, 45, 68, 78, 45, 82, 4, 45, 60, 3, 35, 65, 50, 40, 45, 68, 0, 1, 120, 10, 1, 0,
                     1, 0, 1, 25, 13, 55, 2, 15, 50, 60, 35, 4, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -288,28 +288,28 @@ static const struct {
                     0,
                     0, 4, 20, 4, 1, 40, 75,
                     50, 3, -3, 15, 1}},
-    {"Haze",       {45, 42, 58, 55, 50, 40, 5, 33, 80, 3, 60, 70, 45, 80, 25, 50, 0, 1, 116, 3, 0, 1,
-                    3, 0, 0, 20, 10, 35, 1, 20, 30, 85, 70, 2, 0, 4,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    {"Riemann 13", {52, 12, 72, 82, 30, 55, 4, 45, 64, 0, 50, 70, 45, 40, 40, 62, 0, 1, 120, 4, 5, 0,
+                    3, 0, 2, 0, 8, 50, 1, 25, 55, 80, 50, 0, 0, 3,
+                    0, 0, 0, -25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 31,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 100, 100, 100, 5, 50, 0,
-                    7, 68, 72, 15, 2,
+                    4369, -1, 17476, 4112, 0, 4369, 17476, 0, 4112, 0, 100, 75, 100, 100, 0, 50, 1,
+                    0, 56, 66, 0, 1,
                     70, 70, 100, 50,
-                    50, 50, 50, 50, 70, 50,
+                    45, 100, 25, 50, 40, 50,
                     50, 50, 50, 0,
-                    0, 28,
+                    25, 21,
                     2, 2,
+                    51, 56,
+                    45, 20,
                     0, 0,
-                    55, 30,
-                    -15, 0,
-                    -15, 0, -15, -15, 0,
+                    0, 0, 0, 0, 0,
                     50, 50, 50, 50, 0, 50, 50, 50,
                     0, 0, 0, 0, 0,
                     50, 0, 0, 0,
                     0,
-                    0, 4, 20, 4, 0, 60, 50,
-                    55, -25, -13, 8, 1}},
+                    0, 4, 20, 4, 1, 45, 100,
+                    50, -2, 5, 45, 0}},
 };
 
 const char *en_piece_name(int i) { return PIECES[(unsigned)i < EN_NPIECES ? i : 0].name; }
@@ -338,19 +338,22 @@ static const float ETIME_BEATS[6] = {0.5f, 0.75f, 1.0f, 1.5f, 2.0f, 4.0f};
 /* the Groove knob (P_GROOVE): the five patterns from sparse to busy (GROOVE_PAT: the engine's GROOVE below); Notes
  * (P_BNOTES) how many of its notes play (the rest left out at random, bar by bar); Energy (PERFORM) thins it further,
  * or fills a thin one */
-#define NGROOVE 5
-static const uint8_t GROOVE_PAT[NGROOVE] = {0, 1, 2, 4, 3};
-static const char *const GROOVE_NAME[NGROOVE] = {"Drone", "Offbeat", "Dotted", "Sync", "Roller"};
+#define NGROOVE 7
+static const uint8_t GROOVE_PAT[NGROOVE] = {0, 1, 2, 4, 3, 5, 6};
+static const char *const GROOVE_NAME[NGROOVE] = {"Drone", "Offbeat", "Dotted", "Sync", "Roller", "Skip", "Rolling"};
 /* the bass's grooves (bit i: a note on sixteenth i) and how long each note holds, in sixteenths (Offbeat's
  * held past the next kick, and Roller's nearly to its next note: the kick lands on a bass the duck shapes, not
  * in silence) */
-static const uint16_t GROOVE[5] = {0x0001u, 0x4444u, 0x0909u, 0x4949u, 0x0481u};
-static const float GROOVE_GATE[5] = {15.0f, 3.25f, 2.2f, 1.8f, 2.6f};
-static const float GROOVE_LVL[5] = {1.0f, 0.7f, 1.0f, 0.9f, 1.0f};   /* (the longer ones lower: Offbeat's held more
+/* (engine v3: two more, from the Audioreakt sets' basslines: Skip, Dub Techno 4's six short notes a bar on 1, its
+ * "and", the second's last sixteenth, 3's "and", 4's "e" and its last, the syncopated 16ths; Rolling, Dub Techno 5's
+ * every eighth, the roll under the kick) */
+static const uint16_t GROOVE[7] = {0x0001u, 0x4444u, 0x0909u, 0x4949u, 0x0481u, 0xA485u, 0x5555u};
+static const float GROOVE_GATE[7] = {15.0f, 3.25f, 2.2f, 1.8f, 2.6f, 1.3f, 1.5f};
+static const float GROOVE_LVL[7] = {1.0f, 0.7f, 1.0f, 0.9f, 1.0f, 0.85f, 0.8f};   /* (the longer ones lower: Offbeat's held more
                                                                       * than twice as long, and under the kick) */
 /* (format 32, the variety plan's step 4: no dead steps) Gate's right: up to twice the groove's length, or (Drone, a bar
  * already) up to the bar's 15.8 sixteenths (before, x2 for all, Drone's at the bar from +4, +4..+50 alike) */
-static const float GROOVE_GSPAN[5] = {0.0750f, 1.0f, 1.0f, 1.0f, 1.0f};
+static const float GROOVE_GSPAN[7] = {0.0750f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
 static float rel(int p);
 static int gpat(void);
 static float bass_gate(void)                     /* a note's gate, in sixteenths */
@@ -360,7 +363,7 @@ static float bass_gate(void)                     /* a note's gate, in sixteenths
 }
 static const uint8_t DRIFT_BARS[7] = {2, 4, 8, 16, 32, 64, 0};
 
-uint32_t en_groove(int g) { return GROOVE[(unsigned)g < 5u ? g : 0]; }
+uint32_t en_groove(int g) { return GROOVE[(unsigned)g < 7u ? g : 0]; }
 int en_groove_pat(int knob) { return GROOVE_PAT[(unsigned)knob < NGROOVE ? knob : 0]; }
 int en_drift_bars(int v) { return DRIFT_BARS[(unsigned)v < 7u ? v : 6]; }
 int en_lfo_bars(int v) { return (unsigned)v < EN_LFO_DRIFT ? 1 << v : 0; }   /* (1, 2, 4 .. 32; Drift 0) */

@@ -1060,34 +1060,35 @@ static void lc_fold(int16_t *par, int n)        /* (before 28: the strips' Low c
  * as 1.4.0's test builds had them): every older format's store writes them where a piece has today's (a piece never
  * changed then known by its old recipe on the upgrade, as on a device); (format 35) a Vary and its trims changed, on
  * the old scale (the knob the amount itself), as near as they sound now (en_vary34 the way back) */
-/* (engine v3) the pieces' Motion and Hits as 1.4.3's recipes had them: an older format's store writes a piece at
- * today's recipe as that build's recipe had it (the arrangement in 16-bar blocks raised Motion everywhere, and Basic's,
- * Steppers', Night Drive's and Pressure's Hits) */
-static void recipes_before_v3(int mot, int hits)   /* (mot: where models_before5 won't; hits: where zones_back won't) */
+#include "recipes_143.h"
+/* (engine v3) a piece as 1.4.3's recipe had it: what every older format's conversion below was written against */
+static void old_piece(int i, int16_t *rec, uint16_t *pool)
 {
-    static const int16_t MO[NPIECES] = {12, 12, 8, 42, 16, 28, 8, 4}, HI[NPIECES] = {8, 41, 41, 41, 58, 33, 39, 33};
-    int16_t rec[P_NPARAMS];
+    int k;
+    for (k = 0; k < P_NPARAMS; k++)
+        rec[k] = RECIPE143[(unsigned)i < 8u ? i : 0][k];
+    *pool = EN_MODE_POOL[(unsigned)rec[P_MODE] < EN_NMODES ? rec[P_MODE] : 0];
+}
+/* (engine v3) an older format's store: each value at today's recipe written as 1.4.3's recipe had it (a piece never
+ * changed, whole, as a device of that time held it: Fog's slot as Fog, not Reakt 5), before the older formats' own
+ * conversions, which compare against 1.4.3's (old_piece) */
+static void recipes_before_v3(void)
+{
+    int16_t rec[P_NPARAMS], old[P_NPARAMS];
     uint16_t pl;
-    int i;
+    int i, k;
     for (i = 0; i < NPIECES; i++) {
         en_piece(i, rec, &pl);
-        if (mot && proj.slot[i].par[P_MOTION] == rec[P_MOTION])
-            proj.slot[i].par[P_MOTION] = MO[i];
-        if (hits && proj.slot[i].par[P_HITS] == rec[P_HITS])
-            proj.slot[i].par[P_HITS] = HI[i];
+        old_piece(i, old, &pl);
+        for (k = 0; k < P_NPARAMS; k++)
+            if (k != P_TUNE && k != P_MIDI && k != P_SMODE && proj.slot[i].par[k] == rec[k] &&
+                !(k == P_CUTOFF && proj.slot[i].par[P_CCUT]))   /* (a Cutoff the knob moved from: base and offset one
+                                                  * value, the base today's) */
+                proj.slot[i].par[k] = old[k];
     }
-    {   /* (and Basic's Drums and Duck: 1.4.3's 80, 50) */
-        static const uint8_t BP[2] = {P_DRUMS, P_DUCK};
-        static const int16_t BO[2] = {80, 50};
-        int k;
-        en_piece(0, rec, &pl);
-        for (k = 0; k < 2; k++)
-            if (proj.slot[0].par[BP[k]] == rec[BP[k]])
-                proj.slot[0].par[BP[k]] = BO[k];
-    }
-    for (i = 0; i < P_NPARAMS; i++)
-        if (i == P_MOTION || i == P_HITS || i == P_DRUMS || i == P_DUCK)
-            proj.par[i] = proj.slot[proj.piece].par[i];
+    for (k = 0; k < P_NPARAMS; k++)
+        if (k != P_TUNE && k != P_MIDI && k != P_SMODE)
+            proj.par[k] = proj.slot[proj.piece].par[k];
 }
 static void env_before36(void)                   /* (format 36, REPORT-stabenv) an older format's store: Env amount
                                                   * and the bass's old LFO's slot, Env decay's now, as the recipes had
@@ -1098,7 +1099,7 @@ static void env_before36(void)                   /* (format 36, REPORT-stabenv) 
     int i;
     for (i = 0; i < NPIECES; i++) {
         int16_t *p = proj.slot[i].par;
-        en_piece(i, rec, &pool);
+        old_piece(i, rec, &pool);
         if (p[P_CENV] == rec[P_CENV])
             p[P_CENV] = 0;
         if (p[P_CEDEC] == rec[P_CEDEC])
@@ -1123,7 +1124,7 @@ static void models_before5(void)
     for (i = 0; i < NPIECES; i++) {
         int16_t *p = proj.slot[i].par;
         int v, uv, vo;
-        en_piece(i, rec, &pool);
+        old_piece(i, rec, &pool);
         v = p[P_VARY], uv = v == rec[P_VARY];
         vo = uv ? OLD[i][0] : (int)(100.0f * en_vary_amount(v) + 0.5f);
         for (k = 1; k < 6; k++) {
@@ -1231,7 +1232,7 @@ static void zones_before32(void)
     uint16_t pool;
     int i;
     for (i = 0; i < NPIECES; i++) {
-        en_piece(i, rec, &pool);
+        old_piece(i, rec, &pool);
         zones_back(proj.slot[i].par, rec, i);
     }
     for (i = 0; i < P_NPARAMS; i++)
@@ -1286,8 +1287,7 @@ int main(int argc, char **argv)
         if (st_pre36) {                          /* (format 36) every older format's store: the envelope as before */
             keep();
             st_keep = proj;
-            recipes_before_v3(!st_pre5, !st_old);   /* (engine v3: today's Motion and Hits, 1.4.3's, where the older
-                                                  * stores' own conversions don't reach) */
+            recipes_before_v3();                 /* (engine v3: today's recipes, 1.4.3's) */
             env_before36();
         }
         if (st_pre5)                             /* (step 5) every older format's store: the recipes before it */

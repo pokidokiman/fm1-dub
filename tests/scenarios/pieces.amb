@@ -11,10 +11,10 @@ tap ENV
 spin K1 100
 expect par139 50
 expect par12 40
-# the next piece: Chamber, its recipe (A Aeolian, its own throws)
+# the next piece: Reakt 4 (Chamber before engine v3), its recipe (F Minor, its own throws)
 turn PRESET 1
 expect piece 1
-expect par19 9
+expect par19 5
 expect par20 5
 expect pool 0x5AD
 expect par111 >0

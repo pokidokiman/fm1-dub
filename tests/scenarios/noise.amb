@@ -200,7 +200,8 @@ wait 300
 expect view 23
 spin K3 -3
 wait 300
-expect par167 -15
+# (engine v3: Fog's slot is Reakt 5, Fog's noise in it but Pressure's LFO depths: its old store's Noise LFO reads 8 here)
+expect par167 8
 expect par128 0
 store18
 reboot
@@ -208,7 +209,7 @@ wait 1000
 expect format 36
 expect par121 95
 expect par125 0
-expect par167 -15
+expect par167 8
 expect par130 0
 expect par127 5
 expect par128 2

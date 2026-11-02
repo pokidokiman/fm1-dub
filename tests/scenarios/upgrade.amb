@@ -13,9 +13,9 @@ expect par4 30
 turn PRESET 3
 wait 300
 expect piece 3
-# Fog too (its chord 50, its kick's Density 75)
-expect par0 50
-expect par116 75
+# Fog's slot too, as today has it: Reakt 5 since engine v3 (its chord 55, its kick's Density 100)
+expect par0 55
+expect par116 100
 turn PRESET -3
 storefile tests/host/proj-1.2.0-basic-changed.bin
 reboot
@@ -25,7 +25,7 @@ expect par28 5
 expect par11 60
 turn PRESET 3
 wait 300
-expect par0 50
+expect par0 55
 # a 1.3.0 test build's save (format 14, every piece its recipe then), and the same converted and saved again as 15
 # (its first values that build's recipe, the new ones today's): today's recipe either way
 storefile tests/host/proj-1.3.0-test14.bin
@@ -56,7 +56,7 @@ expect piece 3
 expect par55 35
 expect par127 5
 expect par128 2
-expect par131 90
+expect par131 45
 # (1.4.0, the user's: the Chord's pages) a 1.4.0 LFO pages save (format 20, as the user's FM-1 holds it): a piece
 # changed kept as it is (Fog's Change, 16 bars), the chord's Vary as Evolve alone turned it (its trim 0, step 5b),
 # its LFO's Destination from the recipe (Cutoff); one never changed (Basic), today's recipe
@@ -80,7 +80,7 @@ expect piece 0
 expect par133 0
 expect par6 5
 # (1.4.0, the user's: the layers' pages) a 1.4.0 Chord pages save (format 21, as the user's FM-1 holds it): a piece
-# changed kept, its Cutoff (then the knob itself) the knob's offset from the recipe's (Fog's 46: 54 is +8; the knob stops a moment at 0), the layers'
+# changed kept, its Cutoff (then the knob itself) the knob's offset from the recipe's (engine v3: Fog's slot is Reakt 5, its Cutoff 42; this changed Fog's 46 kept as +4, the knob 10 on: +14), the layers'
 # Vary as Evolve alone turned them (trims 0, step 5b); one never changed (Basic), today's recipe (its Cutoff knob 0, its base 40)
 turn PRESET 3
 wait 300
@@ -92,15 +92,15 @@ wait 300
 expect view 31
 spin K1 10
 wait 300
-expect par139 8
+expect par139 14
 store21
 reboot
 wait 500
 expect format 36
 expect piece 3
 expect par6 3
-expect par12 46
-expect par139 8
+expect par12 42
+expect par139 14
 expect par135 0
 expect par136 0
 expect par137 0
@@ -171,7 +171,7 @@ expect par158 0
 expect par159 4
 expect par160 20
 expect par161 4
-expect par162 0
+expect par162 1
 turn PRESET -3
 wait 300
 expect piece 0
@@ -191,12 +191,12 @@ wait 500
 expect format 36
 expect piece 0
 expect par161 3
-# (the variety study: Basic's Mixer 45, Fog's 90)
+# (the variety study: Basic's Mixer 45; Fog's slot, Reakt 5 since engine v3, 40)
 expect par163 45
 turn PRESET 3
 wait 300
 expect piece 3
-expect par163 90
+expect par163 40
 # (1.4.0, format 28, KellyOffski's) a dub mixer project (format 27): each strip's Low cut (0..100) read as its Filter's
 # high-pass, the same cutoff as near as a step goes (+28, ~290 Hz, saved as 27's 78 and read back +28); a low-pass,
 # which 27 had not, saved as none

@@ -35,7 +35,7 @@ expect par161 4
 tap PLAY
 wait 300
 lvwatch
-# 96 bars at 116: 198.6 s
+# 96 bars at 120 (Riemann 13, Haze before engine v3): 192 s
 wait 203000
 expect playing 0
 # (before: 8 bars, -37.7 LU, -2.9, -5.2, -10.1; this take's kick in at bar 4, faded over 3: 7 bars under)
@@ -43,7 +43,9 @@ expect lvu10 <8
 expect lvin4 >-260
 expect lvin >-22
 expect lvout >-42
-expect lvoutend >-85
+# (engine v3: Riemann 13 in Haze's slot, its main denser (a loop of 16ths, the rim): its last 8 bars -9.2 LU, the
+# classics' -10 to -20 still under it)
+expect lvoutend >-95
 # 2. Pressure, a Pulse intro: its first bars in at once (the kick and the bass over a bar or two, not four)
 turn PRESET -1
 wait 800

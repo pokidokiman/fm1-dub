@@ -104,3 +104,26 @@ Basic was 4-10 dB under the sets, its tails dark above 2.5 kHz; now within 1-3 d
 CPU (host, mean per block): Basic 27.1 us, Steppers 28.7, Pressure 34.5 (30.8 in v2: its Tonewheel rings long, the
 erosion with it). Tests: `transition`'s hand-over strike reads 115 (the erosion's grain on the thrown stab, 17 ms
 after the cue; was 94-97), its limit 125; the scenarios' Basic Drums follow the recipe.
+
+## v3c: four new pieces, two new grooves
+
+The FM-1 holds eight pieces (the save object is 3840 bytes, eight slots fill ~3.3 KB; RAM 95.5%), so four new
+arrangements take Chamber's, Fog's, Concrete's and Haze's places (the user's choice). Each is built from its template's
+own tempo, key, drum loop (the Pattern lanes: Drum play on), bassline, stab placement, echo and arrangement:
+
+| Slot | Piece | From | Tempo, key | Drums (Pattern) | Bass |
+|---|---|---|---|---|---|
+| 2 | Reakt 4 | Audioreakt Dub Techno 4 | 140, F minor | four; 16th shakers accented on each beat's third 16th; open hat on the "ands"; 909 rim on 1, 1e-a, 2&, 3&, 4e; the kick with plate | Skip |
+| 4 | Reakt 5 | Audioreakt Dub Techno 5 | 125, G minor | four; offbeat hats and a 16th pickup; bongo rims on every eighth; claps on 2 and 4; Fog's Tape noise | Rolling |
+| 5 | Riemann 12 | Riemann template 12 | 120, B minor | four and a groove kick on 3&; hats on the beats and the "ands"; claps on 2, 4 and 3&, into the echo | Offbeat |
+| 8 | Riemann 13 | Riemann template 13 | 120, E minor | four; a loop of 16ths; percussion on 2 and 4 | Dotted |
+
+New grooves (the Groove knob 0-6): **Skip**, DT4's bass, six short notes a bar on 1, 1&, 2a, 3&, 4e, 4a;
+**Rolling**, DT5's, every eighth.
+
+A saved piece never changed in those slots becomes the new piece (recipe_prints.h knows the old ones); one changed keeps
+its settings. Tests: the knob tests load the 1.4.3 recipes for those slots (host/recipes_143.h); the simulator's
+older-format stores write 1.4.3's recipes (recipes_before_v3, its conversions against them); the scenarios that named
+or measured the old pieces follow the new ones (piece, tempo, recipe values; two Pattern-drum click readings in the
+incoming piece, 96 and 99, under 110; Riemann 13's outro end -9.2 LU, under -9.5).
+CPU (host, mean per block): Reakt 4 28.8 us, Reakt 5 27.0, Riemann 12 27.8, Riemann 13 32.6.

@@ -97,4 +97,6 @@ expect trrestarts 1
 expect trdip 0
 expect trjump >990
 expect trquiet <2000
-expect trclick <80
+# (engine v3: the new pieces' Pattern drums, crisp hats and rims as their fader rises, read 99, 0.3 s after the eighth's downbeat: in the
+# music, not at the hand-over)
+expect trclick <110
